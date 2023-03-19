@@ -1,0 +1,120 @@
+     1                                  ;**
+     2                                  ;Program name:  Arrays .  Users inputs float numbers then program calculates magnitude and displays arrays and magnitude, program also appends both arrays. Copyright (C) 2021 Raul Jarquin Valdez.                                                                           *
+     3                                  ;                                                                                                                           *
+     4                                  ;This file is part of the software program Arrays.                                                                   *
+     5                                  ;Arrays is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License   *
+     6                                  ;version 3 as published by the Free Software Foundation.                                                                    *
+     7                                  ;Arrays is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied          *
+     8                                  ;warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.     *
+     9                                  ;A copy of the GNU General Public License v3 is available here:  <https:;www.gnu.org/licenses/>.                            *
+    10                                  ;**
+    11                                  
+    12                                  
+    13                                  
+    14                                  
+    15                                  ;========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**
+    16                                  ;
+    17                                  ;Author information
+    18                                  ;  Author name: Raul Jarquin Valdez
+    19                                  ;  Author email: jarquinr121@csu.fullerton.edu
+    20                                  ;
+    21                                  ;Program information
+    22                                  ;  Program name: Arrays
+    23                                  ;  Programming languages: Two modules in C and four module in X86
+    24                                  ;  Date program began:  02/02/23
+    25                                  ;  Date of last update: 02/17/23
+    26                                  ;
+    27                                  ;  Files in this program: manager.asm, input_array.asm, magnitude.asm, append.asm, main.c, display_array.c
+    28                                  ;  Status: Finished.
+    29                                  ;
+    30                                  ;This file
+    31                                  ;   File name: input_array.asm
+    32                                  ;   Language: X86 with Intel syntax.
+    33                                  ;   Max page width: 132 columns
+    34                                  ;   Assemble: nasm -f elf64 -l  input_array.lis  -o   input_array.o  input_array.asm
+    35                                  
+    36                                  ;===== Begin code area ================================================================================================
+    37                                  
+    38                                  global input_array
+    39                                  extern printf
+    40                                  extern scanf
+    41                                  extern stdin
+    42                                  extern clearerr
+    43                                  
+    44                                  
+    45                                  segment .data
+    46 00000000 256C6600                float_format db "%lf",0
+    47                                  
+    48                                  segment .bss    ;Reserved for uninitialized data
+    49                                  
+    50                                  segment .text   ;Reserved for executing instructions.
+    51                                  
+    52                                  input_array:
+    53 00000000 55                      push rbp                                             ;Backing up registers
+    54 00000001 4889E5                  mov  rbp,rsp
+    55 00000004 57                      push rdi                                             ;Backup rdi
+    56 00000005 56                      push rsi                                             ;Backup rsi
+    57 00000006 52                      push rdx                                             ;Backup rdx
+    58 00000007 51                      push rcx                                             ;Backup rcx
+    59 00000008 4150                    push r8                                              ;Backup r8
+    60 0000000A 4151                    push r9                                              ;Backup r9
+    61 0000000C 4152                    push r10                                             ;Backup r10
+    62 0000000E 4153                    push r11                                             ;Backup r11
+    63 00000010 4154                    push r12                                             ;Backup r12
+    64 00000012 4155                    push r13                                             ;Backup r13
+    65 00000014 4156                    push r14                                             ;Backup r14
+    66 00000016 4157                    push r15                                             ;Backup r15
+    67 00000018 53                      push rbx                                             ;Backup rbx
+    68 00000019 9C                      pushf                                                ;Backup rflags
+    69                                  
+    70                                     
+    71 0000001A 4989FF                  mov r15, rdi    ;Holds the first parameter(array_A)
+    72 0000001D 4989F6                  mov r14, rsi    ;Holds the second parameter (array size 20 bytes)
+    73 00000020 41BD00000000            mov r13, 0      ;For loop counter
+    74 00000026 6A00                    push qword 0
+    75                                  
+    76                                  Loop:
+    77 00000028 4D39EE                      cmp r14,r13     ;comparing array size and loop counter 
+    78 0000002B 742C                        je endLoop      ;If equal will jump to endLoop
+    79 0000002D 6A00                        push qword 0    ;push 64 bits of zeros onto stack, After je Endloop 
+    80 0000002F B800000000                  mov rax, 0
+    81 00000034 48BF-                       mov rdi, float_format   ;First paramter float_format
+    81 00000036 [0000000000000000] 
+    82 0000003E 4889E6                      mov rsi, rsp            ;Second paramter rsp(top of stack)
+    83 00000041 E8(00000000)                call scanf
+    84 00000046 4898                        cdqe                    ;so rax can have -1 all across
+    85 00000048 4883F8FF                    cmp rax, -1             ;loop termination condition: user enters cntrl + d
+    86 0000004C 415C                        pop r12         ;value entered stored in r12
+    87 0000004E 7409                        je endLoop
+    88 00000050 4F8924EF                    mov [r15 + 8*r13], r12 ;array[counter](memory address), place input(r12). Multipled by 8 to scale index
+    89 00000054 49FFC5                      inc r13         ;increment r13(counter)
+    90 00000057 EBCF                        jmp Loop
+    91                                      endLoop:
+    92                                  
+    93                                  ;Turn fail bit off 
+    94 00000059 B800000000              mov rax, 0 
+    95 0000005E 488B3C25[00000000]      mov rdi, [stdin]
+    96 00000066 E8(00000000)            call clearerr
+    97                                  
+    98 0000006B 58                      pop rax
+    99 0000006C 4C89E8                  mov rax, r13 ;store counter in rax and send back to manager.asm
+   100                                  
+   101 0000006F 9D                      popf                                              ;Restore rflags
+   102 00000070 5B                      pop rbx                                           ;Restore rbx
+   103 00000071 415F                    pop r15                                           ;Restore r15
+   104 00000073 415E                    pop r14                                           ;Restore r14
+   105 00000075 415D                    pop r13                                           ;Restore r13
+   106 00000077 415C                    pop r12                                           ;Restore r12
+   107 00000079 415B                    pop r11                                           ;Restore r11
+   108 0000007B 415A                    pop r10                                           ;Restore r10
+   109 0000007D 4159                    pop r9                                            ;Restore r9
+   110 0000007F 4158                    pop r8                                            ;Restore r8
+   111 00000081 59                      pop rcx                                           ;Restore rcx
+   112 00000082 5A                      pop rdx                                           ;Restore rdx
+   113 00000083 5E                      pop rsi                                           ;Restore rsi
+   114 00000084 5F                      pop rdi                                           ;Restore rdi
+   115 00000085 5D                      pop rbp                                           ;Restore rbp
+   116                                  
+   117                                  
+   118                                  
+   119 00000086 C3                      ret

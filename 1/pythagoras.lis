@@ -1,0 +1,182 @@
+     1                                  ; Name: Raul Jarquin Valdez
+     2                                  ; Email: jarquinr121@csu.fullerton.edu
+     3                                  ; CWID: 887033116
+     4                                  ; COURSE: CPSC 240-07, Assignment 1
+     5                                  
+     6                                  ;Constants
+     7                                  global asmFile
+     8                                  extern printf
+     9                                  extern scanf
+    10                                  
+    11                                  ;Data(Array with data)
+    12                                  segment .data
+    13 00000000 456E74657220746865-     msg1 db "Enter the length of the first side of the triangle: ", 0
+    13 00000009 206C656E677468206F-
+    13 00000012 662074686520666972-
+    13 0000001B 73742073696465206F-
+    13 00000024 662074686520747269-
+    13 0000002D 616E676C653A2000   
+    14 00000035 256C6600                side1 db "%lf", 0
+    15 00000039 456E74657220746865-     msg2 db "Enter the length of the second side of the triangle: ", 0
+    15 00000042 206C656E677468206F-
+    15 0000004B 662074686520736563-
+    15 00000054 6F6E64207369646520-
+    15 0000005D 6F6620746865207472-
+    15 00000066 69616E676C653A2000 
+    16 0000006F 256C6600                side2 db "%lf", 0
+    17 00000073 0A5468616E6B20796F-     msg3 db 10, "Thank you.  You entered two sides: %.8lf and %.8lf ",0
+    17 0000007C 752E2020596F752065-
+    17 00000085 6E7465726564207477-
+    17 0000008E 6F2073696465733A20-
+    17 00000097 252E386C6620616E64-
+    17 000000A0 20252E386C662000   
+    18 000000A8 0A546865206C656E67-     msg4 db 10, "The length of the hypotenuse is %.8lf ",0
+    18 000000B1 7468206F6620746865-
+    18 000000BA 206879706F74656E75-
+    18 000000C3 736520697320252E38-
+    18 000000CC 6C662000           
+    19 000000D0 4E6567617469766520-     errormsg db "Negative values not allowed. Try again: ",0
+    19 000000D9 76616C756573206E6F-
+    19 000000E2 7420616C6C6F776564-
+    19 000000EB 2E2054727920616761-
+    19 000000F4 696E3A2000         
+    20 000000F9 0000000000000000        zero dq 0.0
+    21                                  
+    22                                  ;Empty for Assignment1
+    23                                  segment .bss
+    24                                  
+    25                                  ;=====================================================================================================
+    26                                  ;Main code 
+    27                                  segment .text
+    28                                  asmFile:
+    29                                  
+    30 00000000 6A00                    push qword 0                                         ;pushes value 0 onto stack, stored as a 64-bit value
+    31                                                                                             
+    32 00000002 55                      push rbp                                             ;Backing up registers
+    33 00000003 4889E5                  mov  rbp,rsp
+    34 00000006 57                      push rdi                                             ;Backup rdi
+    35 00000007 56                      push rsi                                             ;Backup rsi
+    36 00000008 52                      push rdx                                             ;Backup rdx
+    37 00000009 51                      push rcx                                             ;Backup rcx
+    38 0000000A 4150                    push r8                                              ;Backup r8
+    39 0000000C 4151                    push r9                                              ;Backup r9
+    40 0000000E 4152                    push r10                                             ;Backup r10
+    41 00000010 4153                    push r11                                             ;Backup r11
+    42 00000012 4154                    push r12                                             ;Backup r12
+    43 00000014 4155                    push r13                                             ;Backup r13
+    44 00000016 4156                    push r14                                             ;Backup r14
+    45 00000018 4157                    push r15                                             ;Backup r15
+    46 0000001A 53                      push rbx                                             ;Backup rbx
+    47 0000001B 9C                      pushf                                                ;Backup rflags
+    48                                  
+    49                                  ;Asking user for first side
+    50 0000001C 6A00                    push qword 0                                         ;pushes value 0 onto stack, stored as a 64-bit value
+    51 0000001E B800000000              mov rax, 0                                           ;stores value 0 into rax
+    52 00000023 48BF-                   mov rdi, msg1                                        ;First argument in function call. Holds memory address of the string stored at msg1
+    52 00000025 [0000000000000000] 
+    53 0000002D E8(00000000)            call printf                                          ;Argument pushed onto stack and prints msg1 
+    54 00000032 58                      pop rax                                              ;value stored on top of stack(msg1) is copied into rax
+    55                                  
+    56                                  Loop:
+    57                                      ;input of first side
+    58 00000033 6A00                        push qword 0                                    ;pushes value 0 onto stack, stored as a 64-bit value
+    59 00000035 B800000000                  mov rax, 0                                      ;stores value 0 into rax
+    60 0000003A 48BF-                       mov rdi, side1                                  ;First argument in function call. Holds memory address of the double float stored at side1
+    60 0000003C [3500000000000000] 
+    61 00000044 4889E6                      mov rsi, rsp                                    ;pointer that holds address of the top of the stack is stored in rsi
+    62 00000047 E8(00000000)                call scanf                                      ;reads input stores it in rdi & rsi. Values and address are stored on stack 
+    63 0000004C F2440F103C24                movsd xmm15, [rsp]                              ; moves value stored at rsp into xmm15
+    64 00000052 F2450F10F7                  movsd xmm14, xmm15                              ; stores value we entered in xmm14(used for scratch work later)
+    65 00000057 58                          pop rax                                         ; retrieves value from top of the stack and stores it in rax(Evens out the stack) 
+    66                                      
+    67 00000058 F2440F101C25-               movsd xmm11, [zero]                             ; moves a 0 in xmm11 
+    67 0000005E [F9000000]         
+    68 00000062 66450F2EFB                  ucomisd xmm15,xmm11                             ; performs comparison of the two double-precision float numbers. Result is stored in flag registers
+    69 00000067 7202                        jb below_zero                                   ; jump to Below_zero if below condition is met
+    70 00000069 EB19                        jmp end_loop                                    ; if not met will skip over jb belo_zero line and will jump to the end of loop
+    71                                  
+    72                                      below_zero:                                     
+    73 0000006B 6A00                        push qword 0                                    ;pushes value 0 onto stack, stored as a 64-bit value
+    74 0000006D B800000000                  mov rax, 0                                      ;stores value 0 into rax
+    75 00000072 48BF-                       mov rdi, errormsg                               ;First argument in function call. Holds memory address of the string stored at errormsg
+    75 00000074 [D000000000000000] 
+    76 0000007C E8(00000000)                call printf                                     ;Argument pushed onto stack and prints msg1
+    77 00000081 58                          pop rax                                         ;value stored on top of stack(errormsg) is copied into rax
+    78 00000082 EBAF                        jmp Loop                                        ; jump to start of loop again 
+    79                                  end_loop:
+    80                                  
+    81 00000084 6A00                    push qword 0                                        ; Asking user for second side no other comments needed on this block of code
+    82 00000086 B800000000              mov rax, 0
+    83 0000008B 48BF-                   mov rdi, msg2
+    83 0000008D [3900000000000000] 
+    84 00000095 E8(00000000)            call printf
+    85 0000009A 58                      pop rax
+    86                                  
+    87                                  Loop2:                                              ;Restore original values ;Start of second loop2
+    88 0000009B 6A00                        push qword 0                                    ;no further comments to reduce duplicative annotations
+    89 0000009D B800000000                  mov rax, 0
+    90 000000A2 48BF-                       mov rdi, side2
+    90 000000A4 [6F00000000000000] 
+    91 000000AC 4889E6                      mov rsi, rsp
+    92 000000AF E8(00000000)                call scanf
+    93 000000B4 F2440F102C24                movsd xmm13, [rsp]
+    94 000000BA F2450F10E5                  movsd xmm12, xmm13
+    95 000000BF 58                          pop rax
+    96 000000C0 66450F2EEB                  ucomisd xmm13,xmm11
+    97 000000C5 7202                        jb below_zero2
+    98 000000C7 EB19                        jmp end_loop2
+    99                                      below_zero2:
+   100 000000C9 6A00                        push qword 0 
+   101 000000CB B800000000                  mov rax, 0
+   102 000000D0 48BF-                       mov rdi, errormsg
+   102 000000D2 [D000000000000000] 
+   103 000000DA E8(00000000)                call printf
+   104 000000DF 58                          pop rax
+   105 000000E0 EBB9                        jmp Loop2
+   106                                  end_loop2:
+   107                                  
+   108                                  
+   109 000000E2 6A00                    push qword 0                                      ;displaying both numbers 
+   110 000000E4 B802000000              mov rax, 2                                        ;values in xmm0, xmmm1 will be outputted
+   111 000000E9 48BF-                   mov rdi, msg3                                     ;First argument in function call. Holds memory address of the string stored at msg3
+   111 000000EB [7300000000000000] 
+   112 000000F3 F2410F10C7              movsd xmm0, xmm15
+   113 000000F8 F2410F10CD              movsd xmm1, xmm13
+   114 000000FD E8(00000000)            call printf
+   115 00000102 58                      pop rax
+   116                                  
+   117 00000103 6A00                    push qword 0
+   118 00000105 B801000000              mov rax, 1                                        ;Values in xmm0 will be outputted
+   119 0000010A 48BF-                   mov rdi, msg4
+   119 0000010C [A800000000000000] 
+   120 00000114 F2450F59F6              mulsd xmm14, xmm14                                ;multiply xmm14 by itself and store in xmm14
+   121 00000119 F2450F59E4              mulsd xmm12,xmm12                                 ;multiply xmm14 by itself and store in xmm14
+   122 0000011E F2450F58F4              addsd xmm14,xmm12                                 ;Add xmm12 with xmm14 and store in xmm14
+   123 00000123 F2450F51F6              sqrtsd xmm14,xmm14                                ;Take square root of xmm14 and store in xmm14
+   124 00000128 F2410F10C6              movsd xmm0, xmm14                                 ; mov value in xmm14 and store it in xmm0
+   125 0000012D E8(00000000)            call printf                                       
+   126 00000132 58                      pop rax
+   127                                   
+   128 00000133 F2410F10C6              movsd xmm0,xmm14                                  ;send back the result 
+   129                                  
+   130                                                                                      
+   131 00000138 9D                      popf                                              ;Restore rflags
+   132 00000139 5B                      pop rbx                                           ;Restore rbx
+   133 0000013A 415F                    pop r15                                           ;Restore r15
+   134 0000013C 415E                    pop r14                                           ;Restore r14
+   135 0000013E 415D                    pop r13                                           ;Restore r13
+   136 00000140 415C                    pop r12                                           ;Restore r12
+   137 00000142 415B                    pop r11                                           ;Restore r11
+   138 00000144 415A                    pop r10                                           ;Restore r10
+   139 00000146 4159                    pop r9                                            ;Restore r9
+   140 00000148 4158                    pop r8                                            ;Restore r8
+   141 0000014A 59                      pop rcx                                           ;Restore rcx
+   142 0000014B 5A                      pop rdx                                           ;Restore rdx
+   143 0000014C 5E                      pop rsi                                           ;Restore rsi
+   144 0000014D 5F                      pop rdi                                           ;Restore rdi
+   145 0000014E 5D                      pop rbp                                           ;Restore rbp
+   146                                  
+   147 0000014F 58                      pop rax
+   148 00000150 C3                      ret
+   149                                  
+   150                                  

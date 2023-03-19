@@ -1,0 +1,99 @@
+     1                                  ;**
+     2                                  ;Program name:  Arrays .  Users inputs float numbers then program calculates magnitude and displays arrays and magnitude, program also appends both arrays. Copyright (C) 2021 Raul Jarquin Valdez.                                                                           *
+     3                                  ;                                                                                                                           *
+     4                                  ;This file is part of the software program Arrays.                                                                   *
+     5                                  ;Arrays is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License   *
+     6                                  ;version 3 as published by the Free Software Foundation.                                                                    *
+     7                                  ;Arrays is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied          *
+     8                                  ;warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.     *
+     9                                  ;A copy of the GNU General Public License v3 is available here:  <https:;www.gnu.org/licenses/>.                            *
+    10                                  ;**
+    11                                  
+    12                                  
+    13                                  
+    14                                  
+    15                                  ;========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**
+    16                                  ;
+    17                                  ;Author information
+    18                                  ;  Author name: Raul Jarquin Valdez
+    19                                  ;  Author email: jarquinr121@csu.fullerton.edu
+    20                                  ;
+    21                                  ;Program information
+    22                                  ;  Program name: Arrays
+    23                                  ;  Programming languages: Two modules in C and four module in X86
+    24                                  ;  Date program began:  02/02/23
+    25                                  ;  Date of last update: 02/17/23
+    26                                  ;
+    27                                  ;  Files in this program: manager.asm, input_array.asm, magnitude.asm, append.asm, main.c, display_array.c
+    28                                  ;  Status: Finished.
+    29                                  ;
+    30                                  ;This file
+    31                                  ;   File name: magnitude.asm
+    32                                  ;   Language: X86 with Intel syntax.
+    33                                  ;   Max page width: 132 columns
+    34                                  ;   Assemble: nasm -f elf64 -l  magnitude.lis  -o   magnitude.o  magnitude.asm
+    35                                  
+    36                                  ;===== Begin code area ================================================================================================
+    37                                  
+    38                                  
+    39                                  global magnitude
+    40                                  extern printf
+    41                                  extern scanf
+    42                                  
+    43                                  segment .data
+    44                                  segment .bss
+    45                                  
+    46                                  segment .text
+    47                                  
+    48                                  magnitude:
+    49 00000000 55                      push rbp                                             ;Backing up registers
+    50 00000001 4889E5                  mov  rbp,rsp
+    51 00000004 57                      push rdi                                             ;Backup rdi
+    52 00000005 56                      push rsi                                             ;Backup rsi
+    53 00000006 52                      push rdx                                             ;Backup rdx
+    54 00000007 51                      push rcx                                             ;Backup rcx
+    55 00000008 4150                    push r8                                              ;Backup r8
+    56 0000000A 4151                    push r9                                              ;Backup r9
+    57 0000000C 4152                    push r10                                             ;Backup r10
+    58 0000000E 4153                    push r11                                             ;Backup r11
+    59 00000010 4154                    push r12                                             ;Backup r12
+    60 00000012 4155                    push r13                                             ;Backup r13
+    61 00000014 4156                    push r14                                             ;Backup r14
+    62 00000016 4157                    push r15                                             ;Backup r15
+    63 00000018 53                      push rbx                                             ;Backup rbx
+    64 00000019 9C                      pushf                                                ;Backup rflags
+    65                                  
+    66 0000001A 66450F57F6              xorpd xmm14, xmm14      ;xorpd "zeros" out an xmm register 
+    67 0000001F 4989FF                  mov r15, rdi    ;Holds the first parameter(array_A)
+    68 00000022 4989F6                  mov r14, rsi    ;Holds the second parameter elements in array_A
+    69 00000025 41BD00000000            mov r13, 0      ;For loop counter
+    70                                  
+    71                                  BeginLoop:
+    72 0000002B 4D39EE                      cmp r14,r13     ;compare counter with array elements
+    73 0000002E 7415                        je terminateLoop       ;if equal end loop
+    74 00000030 F2470F103CEF                movsd xmm15, [r15 + 8*r13]     ;place array[counter] in xmm15 
+    75 00000036 F2450F59FF                  mulsd xmm15, xmm15             ;multiply array[counter] by itself 
+    76 0000003B F2450F58F7                  addsd xmm14, xmm15             ;Add array[counter] to 0 in the first iteration  
+    77 00000040 49FFC5                      inc r13                        ;increment r13
+    78 00000043 EBE6                        jmp BeginLoop
+    79                                  
+    80                                  terminateLoop:
+    81 00000045 F2450F51F6              sqrtsd xmm14, xmm14     ;square number that you got from all the loop
+    82 0000004A F2410F10C6              movsd xmm0, xmm14
+    83                                  
+    84 0000004F 9D                      popf                                              ;Restore rflags
+    85 00000050 5B                      pop rbx                                           ;Restore rbx
+    86 00000051 415F                    pop r15                                           ;Restore r15
+    87 00000053 415E                    pop r14                                           ;Restore r14
+    88 00000055 415D                    pop r13                                           ;Restore r13
+    89 00000057 415C                    pop r12                                           ;Restore r12
+    90 00000059 415B                    pop r11                                           ;Restore r11
+    91 0000005B 415A                    pop r10                                           ;Restore r10
+    92 0000005D 4159                    pop r9                                            ;Restore r9
+    93 0000005F 4158                    pop r8                                            ;Restore r8
+    94 00000061 59                      pop rcx                                           ;Restore rcx
+    95 00000062 5A                      pop rdx                                           ;Restore rdx
+    96 00000063 5E                      pop rsi                                           ;Restore rsi
+    97 00000064 5F                      pop rdi                                           ;Restore rdi
+    98 00000065 5D                      pop rbp                                           ;Restore rbp
+    99 00000066 C3                      ret 

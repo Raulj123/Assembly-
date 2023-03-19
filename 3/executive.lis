@@ -1,0 +1,355 @@
+     1                                  ;**
+     2                                  ;Program name:  Non-deterministic Random Numbers.This program will generate up to 100 random number(numbers above 100 or below 0 will be rejected) using the non-deterministic 
+     3                                  ;random number generator found inside of modern X86 microprocessors.Later the random numbers are restricted to the interval 1.0 <= Number < 2.0 
+     4                                  ;or even intervals such as 1.0 <= number < M, where is a predetermined fixed upper limit..
+     5                                  ; Copyright (C) 2021 Raul Jarquin Valdez.                                                                           *
+     6                                  ;                                                                                                                           *
+     7                                  ;This file is part of the software program Non-deterministic Random Numbers.                                                                   *
+     8                                  ;Non-deterministic Random Numbers is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License   *
+     9                                  ;version 3 as published by the Free Software Foundation.                                                                    *
+    10                                  ;Non-deterministic Random Numbers is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied          *
+    11                                  ;warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.     *
+    12                                  ;A copy of the GNU General Public License v3 is available here:  <https:;www.gnu.org/licenses/>.                            *
+    13                                  ;**
+    14                                  
+    15                                  
+    16                                  ;========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**
+    17                                  ;
+    18                                  ;Author information
+    19                                  ;  Author name: Raul Jarquin Valdez
+    20                                  ;  Author email: jarquinr121@csu.fullerton.edu
+    21                                  ;
+    22                                  ;Program information
+    23                                  ;  Program name: Non-deterministic Random Numbers
+    24                                  ;  Programming languages: Two modules in C and three module in X86
+    25                                  ;  Date program began:  02/25/23
+    26                                  ;  Date of last update: 03/05/23
+    27                                  ;
+    28                                  ;  Files in this program: executive.asm, fill_random_array.asm, show_array.asm, main.c, compar.c
+    29                                  ;  Status: Finished.
+    30                                  ;
+    31                                  ;This file
+    32                                  ;   File name: executive.asm
+    33                                  ;   Language: X86 with Intel syntax.
+    34                                  ;   Max page width: 132 columns
+    35                                  ;   Assemble: nasm -f elf64 -l executive.lis -o executive.o executive.asm normal.asm
+    36                                  ;   Link: gcc -m64 -no-pie -o main.out executive.o main.o fill_random_array.o show_array.o compar.o normal.o -std=c17
+    37                                  ;   Purpose:  This is the central module that will direct calls to different functions including fill_random_array, show_array,compar.
+    38                                  ;             Using those functions, user will choose how many elements they want(will reject sizes over 100 and below 0) and display them in IEEE & scientific notation and later sort them 
+    39                                  
+    40                                  ;===== Begin code area ================================================================================================
+    41                                  global executive
+    42                                  extern fill_random_array
+    43                                  extern show_array
+    44                                  extern normal
+    45                                  extern compar
+    46                                  extern qsort
+    47                                  extern stdin
+    48                                  extern fgets 
+    49                                  extern strlen
+    50                                  extern printf
+    51                                  extern scanf
+    52                                  
+    53                                  input_length equ 100
+    54                                  array_size equ 100
+    55                                  
+    56                                  
+    57                                  segment .data
+    58 00000000 506C6561736520656E-     msg_name db "Please enter your name: ",0
+    58 00000009 74657220796F757220-
+    58 00000012 6E616D653A2000     
+    59 00000019 506C6561736520656E-     msg_title db "Please enter your title(Mr,Ms,Sargent,Chief,Project Leader,etc.): ",0
+    59 00000022 74657220796F757220-
+    59 0000002B 7469746C65284D722C-
+    59 00000034 4D732C53617267656E-
+    59 0000003D 742C43686965662C50-
+    59 00000046 726F6A656374204C65-
+    59 0000004F 616465722C6574632E-
+    59 00000058 293A2000           
+    60 0000005C 4E69636520746F206D-     msg_greetings db "Nice to meet you %s %s",10,0
+    60 00000065 65657420796F752025-
+    60 0000006E 732025730A00       
+    61 00000074 0A546869732070726F-     msg_program_rules db 10,"This program will generate 64-bit IEEE float numbers.",10, "How many numbers do you want.Today’s limit is 100 per customer: ",0
+    61 0000007D 6772616D2077696C6C-
+    61 00000086 2067656E6572617465-
+    61 0000008F 2036342D6269742049-
+    61 00000098 45454520666C6F6174-
+    61 000000A1 206E756D626572732E-
+    61 000000AA 0A486F77206D616E79-
+    61 000000B3 206E756D6265727320-
+    61 000000BC 646F20796F75207761-
+    61 000000C5 6E742E546F646179E2-
+    61 000000CE 809973206C696D6974-
+    61 000000D7 206973203130302070-
+    61 000000E0 657220637573746F6D-
+    61 000000E9 65723A2000         
+    62 000000EE 256C6400                format_decimal db "%ld",0
+    63 000000F2 546865206E756D6265-     msg_error_below db "The number you entered is below 0. Try again.  ",0
+    63 000000FB 7220796F7520656E74-
+    63 00000104 657265642069732062-
+    63 0000010D 656C6F7720302E2054-
+    63 00000116 727920616761696E2E-
+    63 0000011F 202000             
+    64 00000122 546865206E756D6265-     msg_error_greater db "The number you entered is greater than 100. Try again.  ",0
+    64 0000012B 7220796F7520656E74-
+    64 00000134 657265642069732067-
+    64 0000013D 726561746572207468-
+    64 00000146 616E203130302E2054-
+    64 0000014F 727920616761696E2E-
+    64 00000158 202000             
+    65 0000015B 0A5468652061727261-     msg_sorted db 10,"The array is now being sorted.",10,0
+    65 00000164 79206973206E6F7720-
+    65 0000016D 6265696E6720736F72-
+    65 00000176 7465642E0A00       
+    66 0000017C 0A476F6F6462796520-     msg_goodbye db 10,"Goodbye %s.You are welcome anytime.",10,0
+    66 00000185 25732E596F75206172-
+    66 0000018E 652077656C636F6D65-
+    66 00000197 20616E7974696D652E-
+    66 000001A0 0A00               
+    67 000001A2 0A5468652072616E64-     msg_normal db 10, "The random numbers will be normalized.  Here is the normalized array",10,0
+    67 000001AB 6F6D206E756D626572-
+    67 000001B4 732077696C6C206265-
+    67 000001BD 206E6F726D616C697A-
+    67 000001C6 65642E202048657265-
+    67 000001CF 20697320746865206E-
+    67 000001D8 6F726D616C697A6564-
+    67 000001E1 2061727261790A00   
+    68                                  
+    69                                  segment .bss 
+    70 00000000 <res 64h>               name resb input_length     ;reserves a block of 200 bytes of memory for name 
+    71 00000064 <res 64h>               title resb input_length    ;reserves a block of 200 bytes of memory for title
+    72 000000C8 <res 64h>               array resb array_size      ;reserves 100 qwords 
+    73                                  
+    74                                  
+    75                                  segment .text 
+    76                                  executive:
+    77 00000000 6A00                    push qword 0 
+    78                                  
+    79 00000002 55                      push rbp                                             ;Backing up registers
+    80 00000003 4889E5                  mov  rbp,rsp
+    81 00000006 57                      push rdi                                             ;Backup rdi
+    82 00000007 56                      push rsi                                             ;Backup rsi
+    83 00000008 52                      push rdx                                             ;Backup rdx
+    84 00000009 51                      push rcx                                             ;Backup rcx
+    85 0000000A 4150                    push r8                                              ;Backup r8
+    86 0000000C 4151                    push r9                                              ;Backup r9
+    87 0000000E 4152                    push r10                                             ;Backup r10
+    88 00000010 4153                    push r11                                             ;Backup r11
+    89 00000012 4154                    push r12                                             ;Backup r12
+    90 00000014 4155                    push r13                                             ;Backup r13
+    91 00000016 4156                    push r14                                             ;Backup r14
+    92 00000018 4157                    push r15                                             ;Backup r15
+    93 0000001A 53                      push rbx                                             ;Backup rbx
+    94 0000001B 9C                      pushf                                                ;Backup rflags
+    95                                  
+    96 0000001C 6A00                    push qword 0                ;"Please enter your name:"
+    97 0000001E B800000000              mov rax, 0 
+    98 00000023 48BF-                   mov rdi, msg_name
+    98 00000025 [0000000000000000] 
+    99 0000002D E8(00000000)            call printf
+   100 00000032 58                      pop rax
+   101                                  
+   102                                  
+   103 00000033 6A00                    push qword 0               ;Block to store users name in buffer 
+   104 00000035 B800000000              mov rax, 0 
+   105 0000003A 48BF-                   mov rdi, name              ;First parameter name(reserves 200 bytes of memory)
+   105 0000003C [0000000000000000] 
+   106 00000044 BE64000000              mov rsi, input_length      ;Second parameter size of name
+   107 00000049 488B1425[00000000]      mov rdx,[stdin]            ;Memory address of stdin is stored in rdx
+   108 00000051 E8(00000000)            call fgets                 ;Reads a line from stdin and stores it in name
+   109 00000056 58                      pop rax
+   110                                  
+   111                                  
+   112 00000057 B800000000              mov rax, 0
+   113 0000005C 48BF-                   mov rdi, name
+   113 0000005E [0000000000000000] 
+   114 00000066 E8(00000000)            call strlen                ;Returns length of string including'\n' & excluding '\0' and stores it in rax 
+   115                                  
+   116                                  
+   117 0000006B 4883E801                sub rax, 1                 ;subtract 1 from rax to get the position of '\n'  string representation ex/ hi = [0],[1],[\n],[\0]
+   118 0000006F C680[00000000]00        mov byte[name + rax], 0    ;copy value '0' at memory location of '\n
+   120                                  
+   121 00000076 6A00                    push qword 0               ;"Please enter your title(Mr,Ms,Sargent,Chief,Project Leader,etc.): "
+   122 00000078 B800000000              mov rax, 0 
+   123 0000007D 48BF-                   mov rdi, msg_title
+   123 0000007F [1900000000000000] 
+   124 00000087 E8(00000000)            call printf
+   125 0000008C 58                      pop rax
+   126                                  
+   127                                  
+   128 0000008D 6A00                    push qword 0               ;Block to store users title in buffer 
+   129 0000008F B800000000              mov rax, 0 
+   130 00000094 48BF-                   mov rdi, title             ;First parameter title(reserves 200 bytes of memory)
+   130 00000096 [6400000000000000] 
+   131 0000009E BE64000000              mov rsi, input_length      ;Second parameter size of title
+   132 000000A3 488B1425[00000000]      mov rdx,[stdin]            ;Memory address of stdin is stored in rdx
+   133 000000AB E8(00000000)            call fgets                 ;Reads a line from stdin and stores it in title
+   134 000000B0 58                      pop rax
+   135                                  
+   136                                  
+   137 000000B1 B800000000              mov rax, 0
+   138 000000B6 48BF-                   mov rdi, title
+   138 000000B8 [6400000000000000] 
+   139 000000C0 E8(00000000)            call strlen                ;Returns length of string including'\n' & excluding '\0' and stores it in rax 
+   140                                  
+   141                                  
+   142 000000C5 4883E801                sub rax, 1                 ;subtract 1 from rax to get the position of '\n' 
+   143 000000C9 C680[64000000]00        mov byte[title + rax], 0   ;copy value '0' at memory location of '\n
+   145                                  
+   146 000000D0 6A00                    push qword 0               ;"Nice to meet you..."
+   147 000000D2 B800000000              mov rax, 0 
+   148 000000D7 48BF-                   mov rdi, msg_greetings     
+   148 000000D9 [5C00000000000000] 
+   149 000000E1 48BE-                   mov rsi, title
+   149 000000E3 [6400000000000000] 
+   150 000000EB 48BA-                   mov rdx, name 
+   150 000000ED [0000000000000000] 
+   151 000000F5 E8(00000000)            call printf
+   152 000000FA 58                      pop rax 
+   153                                  
+   154                                  
+   155 000000FB 6A00                    push qword 0               ;"This program will generate 64-bit...."
+   156 000000FD B800000000              mov rax, 0 
+   157 00000102 48BF-                   mov rdi, msg_program_rules   
+   157 00000104 [7400000000000000] 
+   158 0000010C E8(00000000)            call printf
+   159 00000111 58                      pop rax 
+   160                                  
+   161                                  
+   162                                  Loop:                      ;Block for value check, if below 0 or above 100 get a new value
+   163 00000112 6A00                        push qword 0
+   164 00000114 B800000000                  mov rax, 0
+   165 00000119 48BF-                       mov rdi, format_decimal
+   165 0000011B [EE00000000000000] 
+   166 00000123 4889E6                      mov rsi, rsp
+   167 00000126 E8(00000000)                call scanf             ;Places decimal format on top of stack 
+   168 0000012B 58                          pop rax
+   169 0000012C 4989C5                      mov r13, rax           ;Stores value popped from the stack into r13 
+   170                                  
+   171 0000012F 4983FD00                    cmp r13, 0                
+   172 00000133 7C08                        jl lessThan_zero       ;If less than 0 jump to below_zero
+   173 00000135 4983FD64                    cmp r13, 100
+   174 00000139 7F1B                        jg greater_than        ;If greater than 100 jump to greater_than
+   175 0000013B EB32                        jmp endLoop            ;If user entered a number between 0-100 continue with the program 
+   176                                  
+   177                                      lessThan_zero:
+   178 0000013D 6A00                            push qword 0
+   179 0000013F B800000000                      mov rax, 0 
+   180 00000144 48BF-                           mov rdi, msg_error_below    ;"The number you entered is below..."
+   180 00000146 [F200000000000000] 
+   181 0000014E E8(00000000)                    call printf
+   182 00000153 58                              pop rax
+   183 00000154 EBBC                            jmp Loop
+   184                                  
+   185                                      greater_than:
+   186 00000156 6A00                            push qword 0 
+   187 00000158 B800000000                      mov rax, 0 
+   188 0000015D 48BF-                           mov rdi, msg_error_greater   ;"The number you entered is greater..."
+   188 0000015F [2201000000000000] 
+   189 00000167 E8(00000000)                    call printf
+   190 0000016C 58                              pop rax
+   191 0000016D EBA3                            jmp Loop
+   192                                  
+   193                                  endLoop:
+   194                                  
+   195                                  
+   196 0000016F 6A00                    push qword 0 
+   197 00000171 B800000000              mov rax, 0
+   198 00000176 48BF-                   mov rdi, array              ;First parameter array
+   198 00000178 [C800000000000000] 
+   199 00000180 4C89EE                  mov rsi, r13                ;Second parameter array size
+   200 00000183 E8(00000000)            call fill_random_array
+   201 00000188 58                      pop rax 
+   202                                  
+   203                                  
+   204 00000189 6A00                    push qword 0                ;Displaying IEEE and sceintific notation 
+   205 0000018B B800000000              mov rax, 0
+   206 00000190 48BF-                   mov rdi, array              ;First parameter array
+   206 00000192 [C800000000000000] 
+   207 0000019A 4C89EE                  mov rsi, r13                ;Second parameter array size 
+   208 0000019D E8(00000000)            call show_array
+   209 000001A2 58                      pop rax 
+   210                                  
+   211                                  
+   212 000001A3 6A00                    push qword 0                ;"The array is now being.."
+   213 000001A5 B800000000              mov rax, 0
+   214 000001AA 48BF-                   mov rdi, msg_sorted
+   214 000001AC [5B01000000000000] 
+   215 000001B4 E8(00000000)            call printf
+   216 000001B9 58                      pop rax
+   217                                  
+   218 000001BA 48BF-                   mov rdi, array      ;First parameter array 
+   218 000001BC [C800000000000000] 
+   219 000001C4 4C89EE                  mov rsi, r13        ;Second parameter array size
+   220 000001C7 BA08000000              mov rdx, 8          ;Third parameter size in bytes in each element 
+   221 000001CC 48B9-                   mov rcx, compar     ;Fourth parameter comparison fucntion to show qsort how to compare each element in array 
+   221 000001CE [0000000000000000] 
+   222 000001D6 E8(00000000)            call qsort 
+   223                                  
+   224                                  
+   225 000001DB 6A00                    push qword 0                ;Displaying IEEE and sceintific notation (sorted)
+   226 000001DD B800000000              mov rax, 0
+   227 000001E2 48BF-                   mov rdi, array              ;First parameter array
+   227 000001E4 [C800000000000000] 
+   228 000001EC 4C89EE                  mov rsi, r13                ;Second parameter array size 
+   229 000001EF E8(00000000)            call show_array
+   230 000001F4 58                      pop rax 
+   231                                  
+   232                                  
+   233 000001F5 6A00                    push qword 0                ;"normalized..."
+   234 000001F7 B800000000              mov rax, 0
+   235 000001FC 48BF-                   mov rdi, msg_normal
+   235 000001FE [A201000000000000] 
+   236 00000206 E8(00000000)            call printf
+   237 0000020B 58                      pop rax
+   238                                  
+   239                                  
+   240 0000020C 6A00                    push qword 0                ;calling normalized function
+   241 0000020E B800000000              mov rax, 0 
+   242 00000213 48BF-                   mov rdi, array
+   242 00000215 [C800000000000000] 
+   243 0000021D 4C89EE                  mov rsi, r13
+   244 00000220 E8(00000000)            call normal
+   245 00000225 58                      pop rax 
+   246                                  
+   247                                  
+   248 00000226 6A00                    push qword 0                ;Displaying IEEE and sceintific notation (sorted)
+   249 00000228 B800000000              mov rax, 0
+   250 0000022D 48BF-                   mov rdi, array              ;First parameter array
+   250 0000022F [C800000000000000] 
+   251 00000237 4C89EE                  mov rsi, r13                ;Second parameter array size 
+   252 0000023A E8(00000000)            call show_array
+   253 0000023F 58                      pop rax 
+   254                                  
+   255                                  
+   256 00000240 6A00                    push qword 0                ;"Goodbye..."
+   257 00000242 B800000000              mov rax, 0 
+   258 00000247 48BF-                   mov rdi, msg_goodbye
+   258 00000249 [7C01000000000000] 
+   259 00000251 48BE-                   mov rsi, title
+   259 00000253 [6400000000000000] 
+   260 0000025B E8(00000000)            call printf
+   261 00000260 58                      pop rax
+   262                                  
+   263 00000261 9D                      popf                                              ;Restore rflags
+   264 00000262 5B                      pop rbx                                           ;Restore rbx
+   265 00000263 415F                    pop r15                                           ;Restore r15
+   266 00000265 415E                    pop r14                                           ;Restore r14
+   267 00000267 415D                    pop r13                                           ;Restore r13
+   268 00000269 415C                    pop r12                                           ;Restore r12
+   269 0000026B 415B                    pop r11                                           ;Restore r11
+   270 0000026D 415A                    pop r10                                           ;Restore r10
+   271 0000026F 4159                    pop r9                                            ;Restore r9
+   272 00000271 4158                    pop r8                                            ;Restore r8
+   273 00000273 59                      pop rcx                                           ;Restore rcx
+   274 00000274 5A                      pop rdx                                           ;Restore rdx
+   275 00000275 5E                      pop rsi                                           ;Restore rsi
+   276 00000276 5F                      pop rdi                                           ;Restore rdi
+   277 00000277 5D                      pop rbp                                           ;Restore rbp
+   278                                  
+   279 00000278 58                      pop rax
+   280                                  
+   281 00000279 48B8-                   mov rax, name              ;sending back name to main.c
+   281 0000027B [0000000000000000] 
+   282                                  
+   283 00000283 C3                      ret

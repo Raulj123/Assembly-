@@ -1,0 +1,74 @@
+     1                                  global input_array2
+     2                                  extern printf
+     3                                  extern scanf
+     4                                  
+     5                                  segment .data
+     6 00000000 256C6600                float_format db "%lf",0
+     7                                  
+     8                                  segment .bss    ;Reserved for uninitialized data
+     9                                  
+    10                                  segment .text   ;Reserved for executing instructions.
+    11                                  
+    12                                  input_array2:
+    13 00000000 55                      push rbp                                             ;Backing up registers
+    14 00000001 4889E5                  mov  rbp,rsp
+    15 00000004 57                      push rdi                                             ;Backup rdi
+    16 00000005 56                      push rsi                                             ;Backup rsi
+    17 00000006 52                      push rdx                                             ;Backup rdx
+    18 00000007 51                      push rcx                                             ;Backup rcx
+    19 00000008 4150                    push r8                                              ;Backup r8
+    20 0000000A 4151                    push r9                                              ;Backup r9
+    21 0000000C 4152                    push r10                                             ;Backup r10
+    22 0000000E 4153                    push r11                                             ;Backup r11
+    23 00000010 4154                    push r12                                             ;Backup r12
+    24 00000012 4155                    push r13                                             ;Backup r13
+    25 00000014 4156                    push r14                                             ;Backup r14
+    26 00000016 4157                    push r15                                             ;Backup r15
+    27 00000018 53                      push rbx                                             ;Backup rbx
+    28 00000019 9C                      pushf                                                ;Backup rflags
+    29                                  
+    30                                     
+    31 0000001A 4989FF                  mov r15, rdi    ;Holds the first parameter(array_A)
+    32 0000001D 4989F6                  mov r14, rsi    ;Holds the second parameter (array size 20 bytes)
+    33 00000020 41BD00000000            mov r13, 0      ;For loop counter
+    34 00000026 6A00                    push qword 0
+    35                                  Loop:
+    36 00000028 4D39EE                      cmp r14,r13     ;comparing array size and loop counter 
+    37 0000002B 742C                        je endLoop      ;If equal will jump to endLoop
+    38 0000002D 6A00                        push qword 0    ;push 64 bits of zeros onto stack, After je Endloop 
+    39 0000002F B800000000                  mov rax, 0
+    40 00000034 48BF-                       mov rdi, float_format   ;First paramter float_format
+    40 00000036 [0000000000000000] 
+    41 0000003E 4889E6                      mov rsi, rsp            ;Second paramter rsp(top of stack)
+    42 00000041 E8(00000000)                call scanf
+    43 00000046 4898                        cdqe                    ;so rax can have -1 all across
+    44 00000048 4883F8FF                    cmp rax, -1             ;loop termination condition: user enters cntrl + d
+    45 0000004C 415C                        pop r12         ;value entered stored in r12
+    46 0000004E 7409                        je endLoop
+    47 00000050 4F8924EF                    mov [r15 + 8*r13], r12 ;array[counter](memory address), place input(r12). Multipled by 8 to scale index
+    48 00000054 49FFC5                      inc r13         ;increment r13(counter)
+    49 00000057 EBCF                        jmp Loop
+    50                                      
+    51                                  endLoop:
+    52 00000059 58                      pop rax
+    53 0000005A 4C89E8                  mov rax, r13 ;store counter in rax and send back to manager.asm
+    54                                  
+    55 0000005D 9D                      popf                                              ;Restore rflags
+    56 0000005E 5B                      pop rbx                                           ;Restore rbx
+    57 0000005F 415F                    pop r15                                           ;Restore r15
+    58 00000061 415E                    pop r14                                           ;Restore r14
+    59 00000063 415D                    pop r13                                           ;Restore r13
+    60 00000065 415C                    pop r12                                           ;Restore r12
+    61 00000067 415B                    pop r11                                           ;Restore r11
+    62 00000069 415A                    pop r10                                           ;Restore r10
+    63 0000006B 4159                    pop r9                                            ;Restore r9
+    64 0000006D 4158                    pop r8                                            ;Restore r8
+    65 0000006F 59                      pop rcx                                           ;Restore rcx
+    66 00000070 5A                      pop rdx                                           ;Restore rdx
+    67 00000071 5E                      pop rsi                                           ;Restore rsi
+    68 00000072 5F                      pop rdi                                           ;Restore rdi
+    69 00000073 5D                      pop rbp                                           ;Restore rbp
+    70                                  
+    71                                  
+    72                                  
+    73 00000074 C3                      ret

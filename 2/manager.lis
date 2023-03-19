@@ -1,0 +1,329 @@
+     1                                  ;**
+     2                                  ;Program name:  Arrays .  Users inputs float numbers then program calculates magnitude and displays arrays and magnitude, program also appends both arrays. Copyright (C) 2021 Raul Jarquin Valdez.                                                                           *
+     3                                  ;                                                                                                                           *
+     4                                  ;This file is part of the software program Arrays.                                                                   *
+     5                                  ;Arrays is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License   *
+     6                                  ;version 3 as published by the Free Software Foundation.                                                                    *
+     7                                  ;Arrays is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied          *
+     8                                  ;warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.     *
+     9                                  ;A copy of the GNU General Public License v3 is available here:  <https:;www.gnu.org/licenses/>.                            *
+    10                                  ;**
+    11                                  
+    12                                  
+    13                                  
+    14                                  
+    15                                  ;========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**
+    16                                  ;
+    17                                  ;Author information
+    18                                  ;  Author name: Raul Jarquin Valdez
+    19                                  ;  Author email: jarquinr121@csu.fullerton.edu
+    20                                  ;
+    21                                  ;Program information
+    22                                  ;  Program name: Arrays
+    23                                  ;  Programming languages: Two modules in C and four module in X86
+    24                                  ;  Date program began:  02/02/23
+    25                                  ;  Date of last update: 02/17/23
+    26                                  ;
+    27                                  ;  Files in this program: manager.asm, input_array.asm, magnitude.asm, append.asm, main.c, display_array.c
+    28                                  ;  Status: Finished.
+    29                                  ;
+    30                                  ;This file
+    31                                  ;   File name: manager.asm
+    32                                  ;   Language: X86 with Intel syntax.
+    33                                  ;   Max page width: 132 columns
+    34                                  ;   Assemble: nasm -f elf64 -l  manager.lis  -o   manager.o  manager.asm
+    35                                  
+    36                                  ;===== Begin code area ================================================================================================
+    37                                  
+    38                                  
+    39                                  global magnitudeArray
+    40                                  extern printf
+    41                                  extern scanf
+    42                                  extern input_array
+    43                                  extern display_array
+    44                                  extern magnitude
+    45                                  extern append 
+    46                                  max equ 2
+    47                                  
+    48                                  segment .data   
+    49                                  
+    50 00000000 546869732070726F67-     program_rulesA db "This program will manage your arrays of 64-bit floats.",10, "For array A enter a sequence of 64 bit floats separated by white space.",10, "After the last input press enter followed by Control+D:",10,0
+    50 00000009 72616D2077696C6C20-
+    50 00000012 6D616E61676520796F-
+    50 0000001B 757220617272617973-
+    50 00000024 206F662036342D6269-
+    50 0000002D 7420666C6F6174732E-
+    50 00000036 0A466F722061727261-
+    50 0000003F 79204120656E746572-
+    50 00000048 20612073657175656E-
+    50 00000051 6365206F6620363420-
+    50 0000005A 62697420666C6F6174-
+    50 00000063 732073657061726174-
+    50 0000006C 656420627920776869-
+    50 00000075 74652073706163652E-
+    50 0000007E 0A4166746572207468-
+    50 00000087 65206C61737420696E-
+    50 00000090 707574207072657373-
+    50 00000099 20656E74657220666F-
+    50 000000A2 6C6C6F776564206279-
+    50 000000AB 20436F6E74726F6C2B-
+    50 000000B4 443A0A00           
+    51 000000B8 5468657365206E756D-     displayA db "These number were received and placed into array A :",10,0
+    51 000000C1 626572207765726520-
+    51 000000CA 726563656976656420-
+    51 000000D3 616E6420706C616365-
+    51 000000DC 6420696E746F206172-
+    51 000000E5 7261792041203A0A00 
+    52 000000EE 546865206D61676E69-     display_magA db "The magnitude of array A is: %.5lf",10,0
+    52 000000F7 74756465206F662061-
+    52 00000100 727261792041206973-
+    52 00000109 3A20252E356C660A00 
+    53 00000112 0A466F722061727261-     program_rulesB db 10,"For array B enter a sequence of 64-bit floats separated by white space.After the last input press enter followed by Control+D: ",10,0
+    53 0000011B 79204220656E746572-
+    53 00000124 20612073657175656E-
+    53 0000012D 6365206F662036342D-
+    53 00000136 62697420666C6F6174-
+    53 0000013F 732073657061726174-
+    53 00000148 656420627920776869-
+    53 00000151 74652073706163652E-
+    53 0000015A 416674657220746865-
+    53 00000163 206C61737420696E70-
+    53 0000016C 757420707265737320-
+    53 00000175 656E74657220666F6C-
+    53 0000017E 6C6F77656420627920-
+    53 00000187 436F6E74726F6C2B44-
+    53 00000190 3A200A00           
+    54 00000194 5468657365206E756D-     displayB db "These number were received and placed into array B :",10,0
+    54 0000019D 626572207765726520-
+    54 000001A6 726563656976656420-
+    54 000001AF 616E6420706C616365-
+    54 000001B8 6420696E746F206172-
+    54 000001C1 7261792042203A0A00 
+    55 000001CA 546865206D61676E69-     display_magB db "The magnitude of array B is: %.5lf",10,0
+    55 000001D3 74756465206F662061-
+    55 000001DC 727261792042206973-
+    55 000001E5 3A20252E356C660A00 
+    56 000001EE 0A4172726179732041-     appended_msg db 10,"Arrays A and B have been appended and given the name A ⊕  B.",10, "A B contains:",10,0
+    56 000001F7 20616E642042206861-
+    56 00000200 7665206265656E2061-
+    56 00000209 7070656E6465642061-
+    56 00000212 6E6420676976656E20-
+    56 0000021B 746865206E616D6520-
+    56 00000224 4120E28A952020422E-
+    56 0000022D 0A41204220636F6E74-
+    56 00000236 61696E733A0A00     
+    57 0000023D 546865206D61676E69-     display_magAB db "The magnitude of  A ⊕  B is  %.5lf",10,0
+    57 00000246 74756465206F662020-
+    57 0000024F 4120E28A9520204220-
+    57 00000258 69732020252E356C66-
+    57 00000261 0A00               
+    58                                  
+    59                                  segment .bss    ;Reserved for uninitialized data
+    60 00000000 <res 10h>               array_A resq max   ;arrayA of 20 bytes 
+    61 00000010 <res 10h>               array_B resq max   ;arrayB of 20 bytes 
+    62 00000020 <res 10h>               append_array resq max   ;For final array
+    63                                  
+    64                                  
+    65                                  segment .text   ;Reserved for executing instructions.
+    66                                  
+    67                                  magnitudeArray:
+    68 00000000 55                      push rbp                                             ;Backing up registers
+    69 00000001 4889E5                  mov  rbp,rsp
+    70 00000004 57                      push rdi                                             ;Backup rdi
+    71 00000005 56                      push rsi                                             ;Backup rsi
+    72 00000006 52                      push rdx                                             ;Backup rdx
+    73 00000007 51                      push rcx                                             ;Backup rcx
+    74 00000008 4150                    push r8                                              ;Backup r8
+    75 0000000A 4151                    push r9                                              ;Backup r9
+    76 0000000C 4152                    push r10                                             ;Backup r10
+    77 0000000E 4153                    push r11                                             ;Backup r11
+    78 00000010 4154                    push r12                                             ;Backup r12
+    79 00000012 4155                    push r13                                             ;Backup r13
+    80 00000014 4156                    push r14                                             ;Backup r14
+    81 00000016 4157                    push r15                                             ;Backup r15
+    82 00000018 53                      push rbx                                             ;Backup rbx
+    83 00000019 9C                      pushf                                                ;Backup rflags
+    84 0000001A 6A00                    push qword 0
+    85                                  
+    86                                  ;"This program will manage your arrays of 64-bit floats....""
+    87 0000001C 6A00                    push qword 0            
+    88 0000001E B800000000              mov rax, 0
+    89 00000023 48BF-                   mov rdi, program_rulesA
+    89 00000025 [0000000000000000] 
+    90 0000002D E8(00000000)            call printf
+    91 00000032 58                      pop rax 
+    92                                  
+    93                                  ;fill array_A using the input_array module
+    94 00000033 6A00                    push qword 0 
+    95 00000035 B800000000              mov rax, 0
+    96 0000003A 48BF-                   mov rdi, array_A    ;first parameter array_A
+    96 0000003C [0000000000000000] 
+    97 00000044 BE02000000              mov rsi, max        ;Second parameter array size(20 bytes)
+    98 00000049 E8(00000000)            call input_array    ;Calling input_array module 
+    99 0000004E 4989C7                  mov r15, rax        ;Store rax(counter,number of items in array) in r15 
+   100 00000051 58                      pop rax
+   101                                  
+   102                                  
+   103                                  ;"These number were received and placed into the array A:"
+   104 00000052 6A00                    push qword 0 
+   105 00000054 B800000000              mov rax, 0 
+   106 00000059 48BF-                   mov rdi, displayA
+   106 0000005B [B800000000000000] 
+   107 00000063 E8(00000000)            call printf
+   108 00000068 58                      pop rax 
+   109                                  
+   110                                  ;displaying numbers with display_array
+   111 00000069 6A00                    push qword 0
+   112 0000006B B800000000              mov rax, 0 
+   113 00000070 48BF-                   mov rdi, array_A;  first parameter array_A
+   113 00000072 [0000000000000000] 
+   114 0000007A 4C89FE                  mov rsi, r15        ;Second parameter elements in array 
+   115 0000007D E8(00000000)            call display_array
+   116 00000082 58                      pop rax
+   117                                  
+   118                                  ;computing magnitude 
+   119 00000083 6A00                    push qword 0 
+   120 00000085 B800000000              mov rax, 0
+   121 0000008A 48BF-                   mov rdi, array_A    ;first parameter array_A
+   121 0000008C [0000000000000000] 
+   122 00000094 4C89FE                  mov rsi, r15        ;Second parameter elements in array_A
+   123 00000097 E8(00000000)            call magnitude
+   124 0000009C F2440F10F8              movsd xmm15, xmm0
+   125 000000A1 58                      pop rax 
+   126                                  
+   127                                  
+   128                                  ;"The magnitude of array A is: "
+   129 000000A2 6A00                    push qword 0 
+   130 000000A4 B801000000              mov rax, 1
+   131 000000A9 48BF-                   mov rdi, display_magA
+   131 000000AB [EE00000000000000] 
+   132 000000B3 F2410F10C7              movsd xmm0, xmm15
+   133 000000B8 E8(00000000)            call printf
+   134 000000BD 58                      pop rax
+   135                                  
+   136                                  ;"For array B enter a sequence of 64-bit floats.....""
+   137 000000BE 6A00                    push qword 0 
+   138 000000C0 B800000000              mov rax, 0
+   139 000000C5 48BF-                   mov rdi, program_rulesB
+   139 000000C7 [1201000000000000] 
+   140 000000CF E8(00000000)            call printf
+   141 000000D4 58                      pop rax
+   142                                  
+   143                                  ;fill array_B using the input_array module
+   144 000000D5 6A00                    push qword 0 
+   145 000000D7 B800000000              mov rax, 0
+   146 000000DC 48BF-                   mov rdi, array_B  ;first parameter array_B
+   146 000000DE [1000000000000000] 
+   147 000000E6 BE02000000              mov rsi, max      ;Second parameter array size(20 bytes)
+   148 000000EB E8(00000000)            call input_array    ;Calling input_array module 
+   149 000000F0 4989C6                  mov r14, rax        ;Store rax(counter,number of items in array) in r14
+   150 000000F3 58                      pop rax
+   151                                  
+   152                                  ;"These number were received and placed into the array B:"
+   153 000000F4 6A00                    push qword 0 
+   154 000000F6 B800000000              mov rax, 0 
+   155 000000FB 48BF-                   mov rdi, displayB
+   155 000000FD [9401000000000000] 
+   156 00000105 E8(00000000)            call printf
+   157 0000010A 58                      pop rax 
+   158                                  
+   159                                  
+   160                                  ;displaying numbers with display_array
+   161 0000010B 6A00                    push qword 0
+   162 0000010D B800000000              mov rax, 0 
+   163 00000112 48BF-                   mov rdi, array_B;  first parameter array_B
+   163 00000114 [1000000000000000] 
+   164 0000011C 4C89F6                  mov rsi, r14        ;Second parameter elements in array 
+   165 0000011F E8(00000000)            call display_array
+   166 00000124 58                      pop rax
+   167                                  
+   168                                  
+   169                                  ;computing magnitude 
+   170 00000125 6A00                    push qword 0 
+   171 00000127 B800000000              mov rax, 0
+   172 0000012C 48BF-                   mov rdi, array_B   ;first parameter array_A
+   172 0000012E [1000000000000000] 
+   173 00000136 4C89F6                  mov rsi, r14       ;Second parameter elements in array_A
+   174 00000139 E8(00000000)            call magnitude
+   175 0000013E F2440F10F0              movsd xmm14, xmm0
+   176 00000143 58                      pop rax 
+   177                                  
+   178                                  ;"The magnitude of array B is: "
+   179 00000144 6A00                    push qword 0 
+   180 00000146 B801000000              mov rax, 1
+   181 0000014B 48BF-                   mov rdi, display_magB
+   181 0000014D [CA01000000000000] 
+   182 00000155 F2410F10C6              movsd xmm0, xmm14
+   183 0000015A E8(00000000)            call printf
+   184 0000015F 58                      pop rax
+   185                                  
+   186                                  ;"Arrays A and B have been appended and given the...."
+   187 00000160 6A00                    push qword 0
+   188 00000162 B800000000              mov rax, 0
+   189 00000167 48BF-                   mov rdi, appended_msg
+   189 00000169 [EE01000000000000] 
+   190 00000171 E8(00000000)            call printf
+   191 00000176 58                      pop rax 
+   192                                  
+   193 00000177 6A00                    push qword 0 
+   194 00000179 B800000000              mov rax, 0 
+   195 0000017E 48BF-                   mov rdi, array_A    ;first parameter array_A
+   195 00000180 [0000000000000000] 
+   196 00000188 4C89FE                  mov rsi, r15        ;second parameter elements in array_A
+   197 0000018B 48BA-                   mov rdx, array_B    ;third parameter array_B
+   197 0000018D [1000000000000000] 
+   198 00000195 4C89F1                  mov rcx, r14        ;fourth parameter elements in array_B
+   199 00000198 49B8-                   mov r8, append_array
+   199 0000019A [2000000000000000] 
+   200 000001A2 E8(00000000)            call append
+   201 000001A7 4989C5                  mov r13, rax        ;store total elements in both arrays in r13 
+   202 000001AA 58                      pop rax
+   203                                  
+   204                                  ;displaying both arrays
+   205 000001AB 6A00                    push qword 0
+   206 000001AD B800000000              mov rax, 0 
+   207 000001B2 48BF-                   mov rdi, append_array;  first parameter array_A
+   207 000001B4 [2000000000000000] 
+   208 000001BC 4C89EE                  mov rsi, r13        ;Second parameter elements in array_A
+   209 000001BF E8(00000000)            call display_array
+   210 000001C4 58                      pop rax
+   211                                  
+   212                                  ;compute magnitde of A & B
+   213 000001C5 6A00                    push qword 0 
+   214 000001C7 B800000000              mov rax, 0
+   215 000001CC 48BF-                   mov rdi, append_array      ;first parameter array_A (both arrays)
+   215 000001CE [2000000000000000] 
+   216 000001D6 4C89EE                  mov rsi, r13           ;number of elemnts in both arrays 
+   217 000001D9 E8(00000000)            call magnitude
+   218 000001DE F2440F10E8              movsd xmm13, xmm0 
+   219 000001E3 58                      pop rax
+   220                                  
+   221                                  ;"The magnitude of A & B...."
+   222 000001E4 6A00                    push qword  0
+   223 000001E6 B801000000              mov rax, 1
+   224 000001EB 48BF-                   mov rdi, display_magAB
+   224 000001ED [3D02000000000000] 
+   225 000001F5 F2410F10C5              movsd xmm0, xmm13
+   226 000001FA E8(00000000)            call printf
+   227 000001FF 58                      pop rax
+   228                                  
+   229 00000200 58                      pop rax
+   230 00000201 F2410F10C5              movsd xmm0,xmm13     ;contents of xmm15 are copied to the xmm0 register 
+   231                                  
+   232                                  
+   233 00000206 9D                      popf                                              ;Restore rflags
+   234 00000207 5B                      pop rbx                                           ;Restore rbx
+   235 00000208 415F                    pop r15                                           ;Restore r15
+   236 0000020A 415E                    pop r14                                           ;Restore r14
+   237 0000020C 415D                    pop r13                                           ;Restore r13
+   238 0000020E 415C                    pop r12                                           ;Restore r12
+   239 00000210 415B                    pop r11                                           ;Restore r11
+   240 00000212 415A                    pop r10                                           ;Restore r10
+   241 00000214 4159                    pop r9                                            ;Restore r9
+   242 00000216 4158                    pop r8                                            ;Restore r8
+   243 00000218 59                      pop rcx                                           ;Restore rcx
+   244 00000219 5A                      pop rdx                                           ;Restore rdx
+   245 0000021A 5E                      pop rsi                                           ;Restore rsi
+   246 0000021B 5F                      pop rdi                                           ;Restore rdi
+   247 0000021C 5D                      pop rbp                                           ;Restore rbp
+   248 0000021D C3                      ret

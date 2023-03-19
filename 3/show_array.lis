@@ -1,0 +1,123 @@
+     1                                  ;**
+     2                                  ;Program name:  Non-deterministic Random Numbers.This program will generate up to 100 random number using the non-deterministic 
+     3                                  ;random number generator found inside of modern X86 microprocessors.Later the random numbers are restricted to the interval 1.0 <= Number < 2.0 
+     4                                  ;or even intervals such as 1.0 <= number < M, where is a predetermined fixed upper limit..
+     5                                  ; Copyright (C) 2021 Raul Jarquin Valdez.                                                                           *
+     6                                  ;                                                                                                                           *
+     7                                  ;This file is part of the software program Non-deterministic Random Numbers.                                                                   *
+     8                                  ;Non-deterministic Random Numbers is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License   *
+     9                                  ;version 3 as published by the Free Software Foundation.                                                                    *
+    10                                  ;Non-deterministic Random Numbers is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied          *
+    11                                  ;warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.     *
+    12                                  ;A copy of the GNU General Public License v3 is available here:  <https:;www.gnu.org/licenses/>.                            *
+    13                                  ;**
+    14                                  
+    15                                  
+    16                                  ;========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**
+    17                                  ;
+    18                                  ;Author information
+    19                                  ;  Author name: Raul Jarquin Valdez
+    20                                  ;  Author email: jarquinr121@csu.fullerton.edu
+    21                                  ;
+    22                                  ;Program information
+    23                                  ;  Program name: Non-deterministic Random Numbers
+    24                                  ;  Programming languages: Two modules in C and three module in X86
+    25                                  ;  Date program began:  02/25/23
+    26                                  ;  Date of last update: 03/05/23
+    27                                  ;
+    28                                  ;  Files in this program: executive.asm, fill_random_array.asm, show_array.asm, main.c, compar.c normal.asm
+    29                                  ;  Status: Finished.
+    30                                  ;
+    31                                  ;This file
+    32                                  ;   File name: show_array.asm
+    33                                  ;   Language: X86 with Intel syntax.
+    34                                  ;   Max page width: 132 columns
+    35                                  ;   Assemble: nasm -f elf64 -l show_array.lis -o show_array.o show_array.asm
+    36                                  ;   Link: gcc -m64 -no-pie -o main.out executive.o main.o fill_random_array.o show_array.o compar.o normal.o -std=c17
+    37                                  ;   Purpose: Defines show_array, display generated random numbers in IEEE and scientific notation form 
+    38                                  ;===== Begin code area ================================================================================================
+    39                                  
+    40                                  global show_array
+    41                                  extern printf
+    42                                  extern scanf 
+    43                                  
+    44                                  
+    45                                  segment .data
+    46 00000000 0A4945454537353409-     msg_heading db 10,"IEEE754		    Scientific Decimal",10,0
+    46 00000009 092020202053636965-
+    46 00000012 6E7469666963204465-
+    46 0000001B 63696D616C0A00     
+    47 00000022 3078253031366C7820-     output_nums db "0x%016lx %18.13e",10,0
+    47 0000002B 2531382E3133650A00 
+    48                                  
+    49                                  
+    50                                  segment .bss
+    51                                  
+    52                                  
+    53                                  segment .text
+    54                                  show_array:
+    55                                  
+    56 00000000 6A00                    push qword 0 
+    57                                  
+    58 00000002 55                      push rbp                                             ;Backing up registers
+    59 00000003 4889E5                  mov  rbp,rsp
+    60 00000006 57                      push rdi                                             ;Backup rdi
+    61 00000007 56                      push rsi                                             ;Backup rsi
+    62 00000008 52                      push rdx                                             ;Backup rdx
+    63 00000009 51                      push rcx                                             ;Backup rcx
+    64 0000000A 4150                    push r8                                              ;Backup r8
+    65 0000000C 4151                    push r9                                              ;Backup r9
+    66 0000000E 4152                    push r10                                             ;Backup r10
+    67 00000010 4153                    push r11                                             ;Backup r11
+    68 00000012 4154                    push r12                                             ;Backup r12
+    69 00000014 4155                    push r13                                             ;Backup r13
+    70 00000016 4156                    push r14                                             ;Backup r14
+    71 00000018 4157                    push r15                                             ;Backup r15
+    72 0000001A 53                      push rbx                                             ;Backup rbx
+    73 0000001B 9C                      pushf                                                ;Backup rflags
+    74                                  
+    75 0000001C 4989FF                  mov r15, rdi       ;First parameter array
+    76 0000001F 4989F6                  mov r14, rsi       ;Second parameter array size 
+    77 00000022 41BD00000000            mov r13, 0         ;For loop counter 
+    78                                  
+    79 00000028 6A00                    push qword 0       ;Displaying heading 
+    80 0000002A B800000000              mov rax, 0
+    81 0000002F 48BF-                   mov rdi, msg_heading
+    81 00000031 [0000000000000000] 
+    82 00000039 E8(00000000)            call printf 
+    83 0000003E 58                      pop rax
+    84                                  
+    85                                  Loop_show_array:
+    86 0000003F 4D39F5                      cmp r13, r14               ;comparing loop counter to array size 
+    87 00000042 7426                        je  endLoop_show_array     ;If equal jumps to endLoop_show_array
+    88                                    
+    89 00000044 6A00                        push qword 0 
+    90 00000046 B801000000                  mov rax,1
+    91 0000004B 48BF-                       mov rdi, output_nums
+    91 0000004D [2200000000000000] 
+    92 00000055 4B8B34EF                    mov rsi, [r15 +8*r13]       ;moves qword at specific index to rsi 
+    93 00000059 F2430F1004EF                movsd xmm0, [r15 +8*r13] ;converts qword into double float-point value and stores result in xmm0
+    94 0000005F E8(00000000)                call printf
+    95 00000064 58                          pop rax
+    96 00000065 49FFC5                      inc r13                     ;increment index of array
+    97 00000068 EBD5                        jmp Loop_show_array
+    98                                  endLoop_show_array:
+    99                                  
+   100 0000006A 9D                      popf                                              ;Restore rflags
+   101 0000006B 5B                      pop rbx                                           ;Restore rbx
+   102 0000006C 415F                    pop r15                                           ;Restore r15
+   103 0000006E 415E                    pop r14                                           ;Restore r14
+   104 00000070 415D                    pop r13                                           ;Restore r13
+   105 00000072 415C                    pop r12                                           ;Restore r12
+   106 00000074 415B                    pop r11                                           ;Restore r11
+   107 00000076 415A                    pop r10                                           ;Restore r10
+   108 00000078 4159                    pop r9                                            ;Restore r9
+   109 0000007A 4158                    pop r8                                            ;Restore r8
+   110 0000007C 59                      pop rcx                                           ;Restore rcx
+   111 0000007D 5A                      pop rdx                                           ;Restore rdx
+   112 0000007E 5E                      pop rsi                                           ;Restore rsi
+   113 0000007F 5F                      pop rdi                                           ;Restore rdi
+   114 00000080 5D                      pop rbp                                           ;Restore rbp
+   115                                  
+   116 00000081 58                      pop rax
+   117 00000082 C3                      ret 

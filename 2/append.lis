@@ -1,0 +1,115 @@
+     1                                  ;**
+     2                                  ;Program name:  Arrays .  Users inputs float numbers then program calculates magnitude and displays arrays and magnitude, program also appends both arrays. Copyright (C) 2021 Raul Jarquin Valdez.                                                                           *
+     3                                  ;                                                                                                                           *
+     4                                  ;This file is part of the software program Arrays.                                                                   *
+     5                                  ;Arrays is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License   *
+     6                                  ;version 3 as published by the Free Software Foundation.                                                                    *
+     7                                  ;Arrays is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied          *
+     8                                  ;warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.     *
+     9                                  ;A copy of the GNU General Public License v3 is available here:  <https:;www.gnu.org/licenses/>.                            *
+    10                                  ;**
+    11                                  
+    12                                  
+    13                                  
+    14                                  
+    15                                  ;========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**
+    16                                  ;
+    17                                  ;Author information
+    18                                  ;  Author name: Raul Jarquin Valdez
+    19                                  ;  Author email: jarquinr121@csu.fullerton.edu
+    20                                  ;
+    21                                  ;Program information
+    22                                  ;  Program name: Arrays
+    23                                  ;  Programming languages: Two modules in C and four module in X86
+    24                                  ;  Date program began:  02/02/23
+    25                                  ;  Date of last update: 02/17/23
+    26                                  ;
+    27                                  ;  Files in this program: manager.asm, input_array.asm, magnitude.asm, append.asm, main.c, display_array.c
+    28                                  ;  Status: Finished.
+    29                                  ;
+    30                                  ;This file
+    31                                  ;   File name: append.asm
+    32                                  ;   Language: X86 with Intel syntax.
+    33                                  ;   Max page width: 132 columns
+    34                                  ;   Assemble: nasm -f elf64 -l  append.lis  -o   append.o  append.asm
+    35                                  
+    36                                  ;===== Begin code area ================================================================================================
+    37                                  
+    38                                  
+    39                                  
+    40                                  
+    41                                  global append
+    42                                  extern printf
+    43                                  extern scanf
+    44                                  max equ 20 
+    45                                  
+    46                                  segment .data
+    47                                  segment .bss
+    48 00000000 <res A0h>               append_array resq max
+    49                                  
+    50                                  
+    51                                  segment .text
+    52                                  append:
+    53 00000000 55                      push rbp                                             ;Backing up registers
+    54 00000001 4889E5                  mov  rbp,rsp
+    55 00000004 57                      push rdi                                             ;Backup rdi
+    56 00000005 56                      push rsi                                             ;Backup rsi
+    57 00000006 52                      push rdx                                             ;Backup rdx
+    58 00000007 51                      push rcx                                             ;Backup rcx
+    59 00000008 4150                    push r8                                              ;Backup r8
+    60 0000000A 4151                    push r9                                              ;Backup r9
+    61 0000000C 4152                    push r10                                             ;Backup r10
+    62 0000000E 4153                    push r11                                             ;Backup r11
+    63 00000010 4154                    push r12                                             ;Backup r12
+    64 00000012 4155                    push r13                                             ;Backup r13
+    65 00000014 4156                    push r14                                             ;Backup r14
+    66 00000016 4157                    push r15                                             ;Backup r15
+    67 00000018 53                      push rbx                                             ;Backup rbx
+    68 00000019 9C                      pushf                                                ;Backup rflags
+    69                                  
+    70 0000001A 4989FF                  mov r15, rdi        ;array_A
+    71 0000001D 4989F6                  mov r14, rsi        ;elements in array_A
+    72 00000020 4989D5                  mov r13, rdx        ;array_B
+    73 00000023 4989CC                  mov r12, rcx        ;elements in array_B
+    74 00000026 4D89C2                  mov r10, r8         ;append_array
+    75 00000029 41BB00000000            mov r11, 0          ;for counter for first loop
+    76                                  
+    77                                  
+    78                                  addToLoop:
+    79 0000002F 4D39F3                      cmp r11, r14               ;compare counter to elements in array_A
+    80 00000032 740D                        je endLoop                 ;If equal jump to end of loop
+    81 00000034 4F8B04DF                    mov r8, [r15 + 8*r11]      ;value of array_A[0] stored in r8
+    82 00000038 4F8904DA                    mov [r10 + 8*r11], r8      ;value of array_A[0] stored in append_array[0]
+    83 0000003C 49FFC3                      inc r11                    ;increment counter
+    84 0000003F EBEE                        jmp addToLoop              ;jump to start of loop 
+    85                                  endLoop:
+    86                                  
+    87 00000041 B800000000              mov rax, 0                     ;counter for loop2 
+    88                                  addToLoop2:
+    89 00000046 4C39E0                      cmp rax, r12               ;compare counter to elements in array_B
+    90 00000049 7411                        je endLoop2                ;If equal jump to end loop 
+    91 0000004B 4D8B44C500                  mov r8, [r13 +8*rax]       ;value of array_B[0] stored in r8
+    92 00000050 4F8904DA                    mov [r10 +8*r11], r8       ;value of array_B[0] stored in append_array[counter]
+    93 00000054 49FFC3                      inc r11                    ;increment counter(index of append_array)
+    94 00000057 48FFC0                      inc rax                    ;increment counter for loop2
+    95 0000005A EBEA                        jmp addToLoop2
+    96                                  endLoop2:
+    97                                  ;add r12,r14                   ;Total elements in both array
+    98 0000005C 4C89D8                  mov rax, r11                ;return number of total elements 
+    99                                  
+   100 0000005F 9D                      popf                                              ;Restore rflags
+   101 00000060 5B                      pop rbx                                           ;Restore rbx
+   102 00000061 415F                    pop r15                                           ;Restore r15
+   103 00000063 415E                    pop r14                                           ;Restore r14
+   104 00000065 415D                    pop r13                                           ;Restore r13
+   105 00000067 415C                    pop r12                                           ;Restore r12
+   106 00000069 415B                    pop r11                                           ;Restore r11
+   107 0000006B 415A                    pop r10                                           ;Restore r10
+   108 0000006D 4159                    pop r9                                            ;Restore r9
+   109 0000006F 4158                    pop r8                                            ;Restore r8
+   110 00000071 59                      pop rcx                                           ;Restore rcx
+   111 00000072 5A                      pop rdx                                           ;Restore rdx
+   112 00000073 5E                      pop rsi                                           ;Restore rsi
+   113 00000074 5F                      pop rdi                                           ;Restore rdi
+   114 00000075 5D                      pop rbp                                           ;Restore rbp
+   115 00000076 C3                      ret

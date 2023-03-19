@@ -1,0 +1,114 @@
+     1                                  ;**
+     2                                  ;Program name:  Non-deterministic Random Numbers.This program will generate up to 100 random number using the non-deterministic 
+     3                                  ;random number generator found inside of modern X86 microprocessors.Later the random numbers are restricted to the interval 1.0 <= Number < 2.0 
+     4                                  ;or even intervals such as 1.0 <= number < M, where is a predetermined fixed upper limit..
+     5                                  ; Copyright (C) 2021 Raul Jarquin Valdez.                                                                           *
+     6                                  ;                                                                                                                           *
+     7                                  ;This file is part of the software program Non-deterministic Random Numbers.                                                                   *
+     8                                  ;Non-deterministic Random Numbers is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License   *
+     9                                  ;version 3 as published by the Free Software Foundation.                                                                    *
+    10                                  ;Non-deterministic Random Numbers is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied          *
+    11                                  ;warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.     *
+    12                                  ;A copy of the GNU General Public License v3 is available here:  <https:;www.gnu.org/licenses/>.                            *
+    13                                  ;**
+    14                                  
+    15                                  
+    16                                  ;========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**
+    17                                  ;
+    18                                  ;Author information
+    19                                  ;  Author name: Raul Jarquin Valdez
+    20                                  ;  Author email: jarquinr121@csu.fullerton.edu
+    21                                  ;
+    22                                  ;Program information
+    23                                  ;  Program name: Non-deterministic Random Numbers
+    24                                  ;  Programming languages: Two modules in C and three module in X86
+    25                                  ;  Date program began:  02/25/23
+    26                                  ;  Date of last update: 03/05/23
+    27                                  ;
+    28                                  ;  Files in this program: executive.asm, fill_random_array.asm, show_array.asm, main.c, compar.c normal.asm
+    29                                  ;  Status: Finished.
+    30                                  ;
+    31                                  ;This file
+    32                                  ;   File name: fill_random_array.asm
+    33                                  ;   Language: X86 with Intel syntax.
+    34                                  ;   Max page width: 132 columns
+    35                                  ;   Assemble: nasm -f elf64 -l fill_random_array.lis -o fill_random_array.o fill_random_array.asm 
+    36                                  ;   Link: gcc -m64 -no-pie -o main.out executive.o main.o fill_random_array.o show_array.o compar.o normal.o -std=c17
+    37                                  ;   Purpose: Defines fill_random_array, generate qword numbers and store them in array. Will reject nan generated numbers 
+    38                                  ;===== Begin code area ================================================================================================
+    39                                  
+    40                                  
+    41                                  global fill_random_array
+    42                                  extern printf
+    43                                  extern scanf 
+    44                                  
+    45                                  
+    46                                  segment .data
+    47                                  
+    48                                  
+    49                                  segment .bss
+    50                                  
+    51                                  
+    52                                  segment .text
+    53                                  fill_random_array:
+    54                                  
+    55 00000000 6A00                    push qword 0 
+    56                                  
+    57 00000002 55                      push rbp                                             ;Backing up registers
+    58 00000003 4889E5                  mov  rbp,rsp
+    59 00000006 57                      push rdi                                             ;Backup rdi
+    60 00000007 56                      push rsi                                             ;Backup rsi
+    61 00000008 52                      push rdx                                             ;Backup rdx
+    62 00000009 51                      push rcx                                             ;Backup rcx
+    63 0000000A 4150                    push r8                                              ;Backup r8
+    64 0000000C 4151                    push r9                                              ;Backup r9
+    65 0000000E 4152                    push r10                                             ;Backup r10
+    66 00000010 4153                    push r11                                             ;Backup r11
+    67 00000012 4154                    push r12                                             ;Backup r12
+    68 00000014 4155                    push r13                                             ;Backup r13
+    69 00000016 4156                    push r14                                             ;Backup r14
+    70 00000018 4157                    push r15                                             ;Backup r15
+    71 0000001A 53                      push rbx                                             ;Backup rbx
+    72 0000001B 9C                      pushf                                                ;Backup rflags
+    73 0000001C 4989FF                      mov r15, rdi       ;First parameter array
+    74 0000001F 4989F6                      mov r14, rsi       ;Second parameter array size 
+    75 00000022 41BD00000000                mov r13, 0         ;For loop counter 
+    76                                  
+    77                                  
+    78                                     Loop_array:
+    79 00000028 4D39F5                      cmp r13,r14
+    80 0000002B 7424                        je endLoop_array
+    81 0000002D 490FC7F4                    rdrand r12            ;generate qword(64bit)
+    82 00000031 4C89E0                      mov rax, r12          ;saving copy of r12 in rax to test for nan 
+    83 00000034 48C1E834                    shr rax, 52           ;shift rax to the right by the size of mantissa
+    84                                      
+    85                                      ;checking for is nan
+    86 00000038 483DFF070000                cmp rax, 0x7FF        ;If rax equal to positive nan jump to start of loop
+    87 0000003E 74E8                        je Loop_array           
+    88 00000040 483DFF0F0000                cmp rax, 0xFFF        ;If rax equal to negative nan jump to start of loop3737
+    89                                      
+    90 00000046 74E0                        je Loop_array
+    91 00000048 4F8924EF                    mov[r15+8*r13], r12   ;store qword in array
+    92 0000004C 49FFC5                      inc r13               ;increment index of array
+    93 0000004F EBD7                        jmp Loop_array
+    94                                  
+    95                                  endLoop_array:
+    96 00000051 9D                      popf                                              ;Restore rflags
+    97 00000052 5B                      pop rbx                                           ;Restore rbx
+    98 00000053 415F                    pop r15                                           ;Restore r15
+    99 00000055 415E                    pop r14                                           ;Restore r14
+   100 00000057 415D                    pop r13                                           ;Restore r13
+   101 00000059 415C                    pop r12                                           ;Restore r12
+   102 0000005B 415B                    pop r11                                           ;Restore r11
+   103 0000005D 415A                    pop r10                                           ;Restore r10
+   104 0000005F 4159                    pop r9                                            ;Restore r9
+   105 00000061 4158                    pop r8                                            ;Restore r8
+   106 00000063 59                      pop rcx                                           ;Restore rcx
+   107 00000064 5A                      pop rdx                                           ;Restore rdx
+   108 00000065 5E                      pop rsi                                           ;Restore rsi
+   109 00000066 5F                      pop rdi                                           ;Restore rdi
+   110 00000067 5D                      pop rbp                                           ;Restore rbp
+   111                                  
+   112 00000068 58                      pop rax
+   113                                  
+   114 00000069 C3                      ret
