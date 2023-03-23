@@ -1,0 +1,73 @@
+mov r14, 0      ;counter
+mov r13, max    ;size of array
+Loop:
+    cmp r14,r13             ;comparing array size and loop counter 
+    je endLoop              ;If equal will jump to endLoop
+    push qword 0            ;push 64 bits of zeros onto stack, After je Endloop 
+    mov rax, 0
+    mov rdi, string_format   ;First paramter float_format
+    mov rsi, rsp            ;Second paramter rsp(top of stack)
+    call scanf
+
+    cdqe                    ;so rax can have -1 all across
+    cmp rax, -1             ;check if -1 is in rax 
+    je endLoop2             ;loop termination condition: user enters cntrl + d, jump to endloop2   
+
+    mov rax, 0
+    mov rdi, rsp            ;passing top of stack(what user entered)
+    call isfloat            ;isfloat checks if user entered a valid float
+    cmp rax, 0              ;if is a valid float function returns 1 else returns 0 
+    je invalidInput
+    
+    mov rax, 0
+    mov rdi, rsp            ;passing top of stack(what user entered)
+    call atof               ;atof converts string into double float value
+    movsd xmm14, xmm0       ;copy returned value into xmm14
+
+    
+    movsd [array + 8*r14], xmm14 
+    inc r14                 ;increment r13(counter)
+    pop rax                 ;reverse push at start of loop
+    jmp Loop
+
+
+    invalidInput:           ;"Wrong"
+    mov rax, 0
+    mov rdi, msg2
+    call printf
+    pop r11                 ;reverse push at start if isInavalid 
+    jmp Loop
+
+
+    endLoop2:               ;if user enters ctr+D pop rax to reverse push at start of loop(avoid seg fault) then jump to end of loop 
+    pop rax
+    jmp endLoop
+
+endLoop:
+
+
+mov rax, 0 
+mov rdi, [stdin]
+call clearerr
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

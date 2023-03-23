@@ -1,0 +1,82 @@
+     1                                  ; Name: Raul Jarquin Valdez
+     2                                  ; Email: jarquinr121@csu.fullerton.edu
+     3                                  ; Today's date:  03/22/23
+     4                                  ; Section ID: Section 7, MW 12-2pm
+     5                                  
+     6                                  
+     7                                  global reverse
+     8                                  extern printf
+     9                                  extern scanf
+    10                                  
+    11                                  
+    12                                  ;Data(Array with data)
+    13                                  segment .data
+    14                                  
+    15                                  segment .bss
+    16                                  
+    17                                  ;=====================================================================================================
+    18                                  ;Main code 
+    19                                  segment .text
+    20                                  reverse:
+    21                                  
+    22 00000000 55                      push rbp                                             ;Backing up registers
+    23 00000001 4889E5                  mov  rbp,rsp
+    24 00000004 57                      push rdi                                             ;Backup rdi
+    25 00000005 56                      push rsi                                             ;Backup rsi
+    26 00000006 52                      push rdx                                             ;Backup rdx
+    27 00000007 51                      push rcx                                             ;Backup rcx
+    28 00000008 4150                    push r8                                              ;Backup r8
+    29 0000000A 4151                    push r9                                              ;Backup r9
+    30 0000000C 4152                    push r10                                             ;Backup r10
+    31 0000000E 4153                    push r11                                             ;Backup r11
+    32 00000010 4154                    push r12                                             ;Backup r12
+    33 00000012 4155                    push r13                                             ;Backup r13
+    34 00000014 4156                    push r14                                             ;Backup r14
+    35 00000016 4157                    push r15                                             ;Backup r15
+    36 00000018 53                      push rbx                                             ;Backup rbx
+    37 00000019 9C                      pushf                                                ;Backup rflags
+    38                                  
+    39                                  
+    40 0000001A 4989FF                  mov r15, rdi    ;array_a
+    41 0000001D 4989F6                  mov r14, rsi    ;array_b
+    42 00000020 4989D5                  mov r13, rdx    ;array_a len
+    43 00000023 41BC00000000            mov r12, 0      ;counter
+    44                                  
+    45 00000029 4983ED01                sub r13,1
+    46                                  beginLoop:
+    47 0000002D 4983FD00                    cmp r13,0
+    48 00000031 7C14                        jl endLoop
+    49                                  
+    50 00000033 F2470F103CEF                movsd xmm15, [r15+8*r13]
+    51 00000039 F2470F113CE6                movsd[r14+8*r12], xmm15
+    52                                  
+    53 0000003F 49FFCD                      dec r13
+    54 00000042 49FFC4                      inc r12
+    55 00000045 EBE6                        jmp beginLoop
+    56                                  
+    57                                  endLoop:
+    58                                  
+    59                                  
+    60                                  
+    61                                  
+    62                                                                                      
+    63 00000047 9D                      popf                                              ;Restore rflags
+    64 00000048 5B                      pop rbx                                           ;Restore rbx
+    65 00000049 415F                    pop r15                                           ;Restore r15
+    66 0000004B 415E                    pop r14                                           ;Restore r14
+    67 0000004D 415D                    pop r13                                           ;Restore r13
+    68 0000004F 415C                    pop r12                                           ;Restore r12
+    69 00000051 415B                    pop r11                                           ;Restore r11
+    70 00000053 415A                    pop r10                                           ;Restore r10
+    71 00000055 4159                    pop r9                                            ;Restore r9
+    72 00000057 4158                    pop r8                                            ;Restore r8
+    73 00000059 59                      pop rcx                                           ;Restore rcx
+    74 0000005A 5A                      pop rdx                                           ;Restore rdx
+    75 0000005B 5E                      pop rsi                                           ;Restore rsi
+    76 0000005C 5F                      pop rdi                                           ;Restore rdi
+    77 0000005D 5D                      pop rbp                                           ;Restore rbp
+    78                                  
+    79                                  
+    80                                  
+    81 0000005E C3                      ret
+    82                                  

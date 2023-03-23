@@ -1,0 +1,107 @@
+     1                                  ; Name: Raul Jarquin Valdez
+     2                                  ; Email: jarquinr121@csu.fullerton.edu
+     3                                  ; Today's date:  03/22/23
+     4                                  ; Section ID: Section 7, MW 12-2pm
+     5                                  
+     6                                  
+     7                                  
+     8                                  global input_array
+     9                                  extern printf
+    10                                  extern scanf
+    11                                  extern stdin
+    12                                  extern clearerr
+    13                                  
+    14                                  
+    15                                  ;Data(Array with data)
+    16                                  segment .data
+    17 00000000 256C6600                float_format db "%lf",0
+    18 00000004 496E61766C6964206E-     msg2 db "Inavlid num not entered in array",0
+    18 0000000D 756D206E6F7420656E-
+    18 00000016 746572656420696E20-
+    18 0000001F 617272617900       
+    19                                  
+    20                                  segment .bss
+    21                                  
+    22                                  ;=====================================================================================================
+    23                                  ;Main code 
+    24                                  segment .text
+    25                                  input_array:
+    26                                  
+    27 00000000 55                      push rbp                                             ;Backing up registers
+    28 00000001 4889E5                  mov  rbp,rsp
+    29 00000004 57                      push rdi                                             ;Backup rdi
+    30 00000005 56                      push rsi                                             ;Backup rsi
+    31 00000006 52                      push rdx                                             ;Backup rdx
+    32 00000007 51                      push rcx                                             ;Backup rcx
+    33 00000008 4150                    push r8                                              ;Backup r8
+    34 0000000A 4151                    push r9                                              ;Backup r9
+    35 0000000C 4152                    push r10                                             ;Backup r10
+    36 0000000E 4153                    push r11                                             ;Backup r11
+    37 00000010 4154                    push r12                                             ;Backup r12
+    38 00000012 4155                    push r13                                             ;Backup r13
+    39 00000014 4156                    push r14                                             ;Backup r14
+    40 00000016 4157                    push r15                                             ;Backup r15
+    41 00000018 53                      push rbx                                             ;Backup rbx
+    42 00000019 9C                      pushf                                                ;Backup rflags
+    43                                  
+    44                                  
+    45 0000001A 4989FF                  mov r15, rdi    ;array_a
+    46 0000001D 4989F6                  mov r14, rsi    ;len
+    47 00000020 41BD00000000            mov r13, 0      ;counter
+    48                                  
+    49 00000026 6A00                    push qword 0 
+    50                                  Loop:
+    51 00000028 4D39EE                      cmp r14,r13     ;comparing array size and loop counter 
+    52 0000002B 742E                        je endLoop      ;If equal will jump to endLoop
+    53 0000002D 6A00                        push qword 0    ;push 64 bits of zeros onto stack, After je Endloop 
+    54 0000002F B800000000                  mov rax, 0
+    55 00000034 48BF-                       mov rdi, float_format   ;First paramter float_format
+    55 00000036 [0000000000000000] 
+    56 0000003E 4889E6                      mov rsi, rsp            ;Second paramter rsp(top of stack)
+    57 00000041 E8(00000000)                call scanf
+    58                                      
+    59 00000046 4898                        cdqe                    ;so rax can have -1 all across
+    60 00000048 4883F8FF                    cmp rax, -1             ;loop termination condition: user enters cntrl + d
+    61 0000004C 415C                        pop r12
+    62 0000004E 740B                        je endLoop
+    63                                  
+    64                                  
+    65                                  
+    66 00000050 4F8924EF                    mov [r15 + 8*r13], r12 ;array[counter](memory address), place input(r12). Multipled by 8 to scale index
+    67 00000054 49FFC5                      inc r13         ;increment r13(counter)
+    68 00000057 EBCF                        jmp Loop
+    69                                  
+    70                                  
+    71                                      
+    72                                      
+    73                                  
+    74 00000059 EB00                        jmp endLoop
+    75                                  endLoop:
+    76 0000005B B800000000              mov rax, 0 
+    77 00000060 488B3C25[00000000]      mov rdi, [stdin]
+    78 00000068 E8(00000000)            call clearerr
+    79 0000006D 58                      pop rax 
+    80                                  
+    81 0000006E 4C89E8                  mov rax, r13 ;store counter in rax and send back to manager.asm
+    82                                  
+    83                                                                                      
+    84 00000071 9D                      popf                                              ;Restore rflags
+    85 00000072 5B                      pop rbx                                           ;Restore rbx
+    86 00000073 415F                    pop r15                                           ;Restore r15
+    87 00000075 415E                    pop r14                                           ;Restore r14
+    88 00000077 415D                    pop r13                                           ;Restore r13
+    89 00000079 415C                    pop r12                                           ;Restore r12
+    90 0000007B 415B                    pop r11                                           ;Restore r11
+    91 0000007D 415A                    pop r10                                           ;Restore r10
+    92 0000007F 4159                    pop r9                                            ;Restore r9
+    93 00000081 4158                    pop r8                                            ;Restore r8
+    94 00000083 59                      pop rcx                                           ;Restore rcx
+    95 00000084 5A                      pop rdx                                           ;Restore rdx
+    96 00000085 5E                      pop rsi                                           ;Restore rsi
+    97 00000086 5F                      pop rdi                                           ;Restore rdi
+    98 00000087 5D                      pop rbp                                           ;Restore rbp
+    99                                  
+   100                                  
+   101                                  
+   102 00000088 C3                      ret
+   103                                  

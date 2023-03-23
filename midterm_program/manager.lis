@@ -1,0 +1,296 @@
+     1                                  ; Name: Raul Jarquin Valdez
+     2                                  ; Email: jarquinr121@csu.fullerton.edu
+     3                                  ; Today's date:  03/22/23
+     4                                  ; Section ID: Section 7, MW 12-2pm
+     5                                  
+     6                                  ;Constants
+     7                                  global manager
+     8                                  extern isfloat
+     9                                  extern printf
+    10                                  extern scanf
+    11                                  extern stdin
+    12                                  extern clearerr
+    13                                  extern atof
+    14                                  extern fgets
+    15                                  extern strlen
+    16                                  extern input_array
+    17                                  extern display_array
+    18                                  extern reverse 
+    19                                  max equ 10
+    20                                  input_len equ 100
+    21                                  
+    22                                  ;Data(Array with data)
+    23                                  segment .data
+    24 00000000 506C6561736520656E-     msg1 db "Please enter your name: ", 0
+    24 00000009 74657220796F757220-
+    24 00000012 6E616D653A2000     
+    25 00000019 576861742069732079-     msg2 db "What is your title: ",0
+    25 00000022 6F7572207469746C65-
+    25 0000002B 3A2000             
+    26 0000002E 57656C636F6D652025-     msg3 db "Welcome %s %s",10,0
+    26 00000037 732025730A00       
+    27 0000003D 54686973206973206F-     msg4 db "This is our reversible program.",10,0
+    27 00000046 757220726576657273-
+    27 0000004F 69626C652070726F67-
+    27 00000058 72616D2E0A00       
+    28 0000005E 506C6561736520656E-     msg5 db "Please enter float numbers separated by ws and press <enter><control+d> to terminate inputs.",10,0
+    28 00000067 74657220666C6F6174-
+    28 00000070 206E756D6265727320-
+    28 00000079 736570617261746564-
+    28 00000082 20627920777320616E-
+    28 0000008B 64207072657373203C-
+    28 00000094 656E7465723E3C636F-
+    28 0000009D 6E74726F6C2B643E20-
+    28 000000A6 746F207465726D696E-
+    28 000000AF 61746520696E707574-
+    28 000000B8 732E0A00           
+    29 000000BC 257300                  string_format db "%s",0
+    30 000000BF 0A596F7520656E7465-     msg6 db 10,"You entered",10,0
+    30 000000C8 7265640A00         
+    31 000000CD 546865206172726179-     msg7 db "The array has %d doubles",10,0
+    31 000000D6 206861732025642064-
+    31 000000DF 6F75626C65730A00   
+    32 000000E7 0A5468652066756E63-     msg8 db 10,"The function reverse was called",0
+    32 000000F0 74696F6E2072657665-
+    32 000000F9 727365207761732063-
+    32 00000102 616C6C656400       
+    33 00000108 0A546865207365636F-     msg9 db 10,"The second array holds these values",10,0
+    33 00000111 6E6420617272617920-
+    33 0000011A 686F6C647320746865-
+    33 00000123 73652076616C756573-
+    33 0000012C 0A00               
+    34                                  
+    35                                  segment .bss
+    36 00000000 <res 50h>               array_a resq max   ;array_a reserves 10, 64 bit nums
+    37 00000050 <res 50h>               array_b resq max ;array_b
+    38 000000A0 <res 64h>               name resb input_len
+    39 00000104 <res 64h>               title resb input_len
+    40                                  ;=====================================================================================================
+    41                                  ;Main code 
+    42                                  segment .text
+    43                                  manager:
+    44                                  
+    45 00000000 6A00                    push qword 0                                         ;pushes value 0 onto stack, stored as a 64-bit value
+    46                                                                                             
+    47 00000002 55                      push rbp                                             ;Backing up registers
+    48 00000003 4889E5                  mov  rbp,rsp
+    49 00000006 57                      push rdi                                             ;Backup rdi
+    50 00000007 56                      push rsi                                             ;Backup rsi
+    51 00000008 52                      push rdx                                             ;Backup rdx
+    52 00000009 51                      push rcx                                             ;Backup rcx
+    53 0000000A 4150                    push r8                                              ;Backup r8
+    54 0000000C 4151                    push r9                                              ;Backup r9
+    55 0000000E 4152                    push r10                                             ;Backup r10
+    56 00000010 4153                    push r11                                             ;Backup r11
+    57 00000012 4154                    push r12                                             ;Backup r12
+    58 00000014 4155                    push r13                                             ;Backup r13
+    59 00000016 4156                    push r14                                             ;Backup r14
+    60 00000018 4157                    push r15                                             ;Backup r15
+    61 0000001A 53                      push rbx                                             ;Backup rbx
+    62 0000001B 9C                      pushf                                                ;Backup rflags
+    63                                  
+    64                                  
+    65                                  
+    66 0000001C 6A00                    push qword 0        ;"Enter your name"
+    67 0000001E B800000000              mov rax, 0 
+    68 00000023 48BF-                   mov rdi, msg1
+    68 00000025 [0000000000000000] 
+    69 0000002D E8(00000000)            call printf
+    70 00000032 58                      pop rax 
+    71                                  
+    72                                  
+    73 00000033 6A00                    push qword 0    ;block to store name in buffer
+    74 00000035 B800000000              mov rax, 0
+    75 0000003A 48BF-                   mov rdi, name
+    75 0000003C [A000000000000000] 
+    76 00000044 BE64000000              mov rsi, input_len
+    77 00000049 488B1425[00000000]      mov rdx, [stdin]
+    78 00000051 E8(00000000)            call fgets
+    79 00000056 58                      pop rax
+    80                                  
+    81                                  
+    82 00000057 B800000000              mov rax, 0       ;returns len of string excluding '\0' stores in rax
+    83 0000005C 48BF-                   mov rdi, name
+    83 0000005E [A000000000000000] 
+    84 00000066 E8(00000000)            call strlen         
+    85                                  
+    86 0000006B 4883E801                sub rax, 1       ;copy value 0 at mem location of \n
+    87 0000006F C680[A0000000]00        mov byte[name + rax], 0
+    88                                  
+    89                                  
+    90 00000076 6A00                    push qword 0
+    91 00000078 B800000000              mov rax, 0
+    92 0000007D 48BF-                   mov rdi, msg2
+    92 0000007F [1900000000000000] 
+    93 00000087 E8(00000000)            call printf
+    94 0000008C 58                      pop rax
+    95                                  
+    96                                  
+    97 0000008D 6A00                    push qword 0    ;block to store name in buffer
+    98 0000008F B800000000              mov rax, 0
+    99 00000094 48BF-                   mov rdi, title
+    99 00000096 [0401000000000000] 
+   100 0000009E BE64000000              mov rsi, input_len
+   101 000000A3 488B1425[00000000]      mov rdx, [stdin]
+   102 000000AB E8(00000000)            call fgets
+   103 000000B0 58                      pop rax
+   104                                  
+   105                                  
+   106 000000B1 B800000000              mov rax, 0       ;returns len of string excluding '\0' stores in rax
+   107 000000B6 48BF-                   mov rdi, title
+   107 000000B8 [0401000000000000] 
+   108 000000C0 E8(00000000)            call strlen         
+   109                                  
+   110 000000C5 4883E801                sub rax, 1       ;copy value 0 at mem location of \n
+   111 000000C9 C680[04010000]00        mov byte[title + rax], 0
+   112                                  
+   113                                  
+   114                                  
+   115 000000D0 6A00                    push qword 0       ;"Welcome..."
+   116 000000D2 B800000000              mov rax, 0 
+   117 000000D7 48BF-                   mov rdi, msg3
+   117 000000D9 [2E00000000000000] 
+   118 000000E1 48BE-                   mov rsi, title
+   118 000000E3 [0401000000000000] 
+   119 000000EB 48BA-                   mov rdx, name
+   119 000000ED [A000000000000000] 
+   120 000000F5 E8(00000000)            call printf
+   121 000000FA 58                      pop rax
+   122                                  
+   123                                  
+   124 000000FB 6A00                    push qword 0    ;"This is our..."
+   125 000000FD B800000000              mov rax, 0
+   126 00000102 48BF-                   mov rdi, msg4
+   126 00000104 [3D00000000000000] 
+   127 0000010C E8(00000000)            call printf
+   128 00000111 58                      pop rax
+   129                                  
+   130                                  
+   131 00000112 6A00                    push qword 0    ;"Please enter.."
+   132 00000114 B800000000              mov rax, 0
+   133 00000119 48BF-                   mov rdi, msg5
+   133 0000011B [5E00000000000000] 
+   134 00000123 E8(00000000)            call printf
+   135 00000128 58                      pop rax
+   136                                  
+   137                                  
+   138 00000129 6A00                    push qword 0 
+   139 0000012B B800000000              mov rax, 0 
+   140 00000130 48BF-                   mov rdi, array_a
+   140 00000132 [0000000000000000] 
+   141 0000013A BE0A000000              mov rsi, max
+   142 0000013F E8(00000000)            call input_array
+   143 00000144 4989C5                  mov r13, rax
+   144 00000147 58                      pop rax 
+   145                                  
+   146                                  
+   147 00000148 6A00                    push qword 0    ;"You enterd"
+   148 0000014A B800000000              mov rax, 0
+   149 0000014F 48BF-                   mov rdi, msg6
+   149 00000151 [BF00000000000000] 
+   150 00000159 E8(00000000)            call printf
+   151 0000015E 58                      pop rax
+   152                                  
+   153                                  
+   154 0000015F 6A00                    push qword 0 
+   155 00000161 B800000000              mov rax, 0
+   156 00000166 48BF-                   mov rdi, array_a
+   156 00000168 [0000000000000000] 
+   157 00000170 4C89EE                  mov rsi, r13
+   158 00000173 E8(00000000)            call display_array
+   159 00000178 58                      pop rax 
+   160                                  
+   161 00000179 6A00                    push qword 0    ;"The array has n doubles"
+   162 0000017B B800000000              mov rax, 0
+   163 00000180 48BF-                   mov rdi, msg7
+   163 00000182 [CD00000000000000] 
+   164 0000018A 4C89EE                  mov rsi, r13
+   165 0000018D E8(00000000)            call printf
+   166 00000192 58                      pop rax
+   167                                  
+   168                                  
+   169 00000193 6A00                    push qword 0    ;"The function reverse..."
+   170 00000195 B800000000              mov rax, 0
+   171 0000019A 48BF-                   mov rdi, msg8
+   171 0000019C [E700000000000000] 
+   172 000001A4 E8(00000000)            call printf
+   173 000001A9 58                      pop rax
+   174                                  
+   175 000001AA 6A00                    push qword 0    ;call reverse fucntion 
+   176 000001AC B800000000              mov rax, 0
+   177 000001B1 48BF-                   mov rdi, array_a
+   177 000001B3 [0000000000000000] 
+   178 000001BB 48BE-                   mov rsi, array_b
+   178 000001BD [5000000000000000] 
+   179 000001C5 4C89EA                  mov rdx, r13        ;size of array_a
+   180 000001C8 E8(00000000)            call reverse
+   181 000001CD 58                      pop rax
+   182                                  
+   183                                  
+   184 000001CE 6A00                    push qword 0    ;"The second array holds..."
+   185 000001D0 B800000000              mov rax, 0
+   186 000001D5 48BF-                   mov rdi, msg9
+   186 000001D7 [0801000000000000] 
+   187 000001DF E8(00000000)            call printf
+   188 000001E4 58                      pop rax
+   189                                  
+   190                                  
+   191 000001E5 6A00                    push qword 0        ;Display reverse array
+   192 000001E7 B800000000              mov rax, 0
+   193 000001EC 48BF-                   mov rdi, array_b
+   193 000001EE [5000000000000000] 
+   194 000001F6 4C89EE                  mov rsi, r13
+   195 000001F9 E8(00000000)            call display_array
+   196 000001FE 58                      pop rax 
+   197                                  
+   198                                  
+   199                                  
+   200                                  
+   201                                  
+   202                                  
+   203                                  
+   204                                  
+   205                                  
+   206                                  
+   207                                  
+   208                                  
+   209                                  
+   210                                  
+   211                                  
+   212                                  
+   213                                  
+   214                                  
+   215                                  
+   216                                  
+   217                                  
+   218                                  
+   219                                  
+   220                                  
+   221                                  
+   222                                  
+   223                                  
+   224                                  
+   225                                                                                      
+   226 000001FF 9D                      popf                                              ;Restore rflags
+   227 00000200 5B                      pop rbx                                           ;Restore rbx
+   228 00000201 415F                    pop r15                                           ;Restore r15
+   229 00000203 415E                    pop r14                                           ;Restore r14
+   230 00000205 415D                    pop r13                                           ;Restore r13
+   231 00000207 415C                    pop r12                                           ;Restore r12
+   232 00000209 415B                    pop r11                                           ;Restore r11
+   233 0000020B 415A                    pop r10                                           ;Restore r10
+   234 0000020D 4159                    pop r9                                            ;Restore r9
+   235 0000020F 4158                    pop r8                                            ;Restore r8
+   236 00000211 59                      pop rcx                                           ;Restore rcx
+   237 00000212 5A                      pop rdx                                           ;Restore rdx
+   238 00000213 5E                      pop rsi                                           ;Restore rsi
+   239 00000214 5F                      pop rdi                                           ;Restore rdi
+   240 00000215 5D                      pop rbp                                           ;Restore rbp
+   241                                  
+   242 00000216 58                      pop rax
+   243                                  
+   244 00000217 48B8-                   mov rax, name
+   244 00000219 [A000000000000000] 
+   245                                  
+   246 00000221 C3                      ret
+   247                                  
