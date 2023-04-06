@@ -1,0 +1,120 @@
+     1                                  ;**
+     2                                  ;Program name: Benchmark
+     3                                  ;Program displays CPU as well as Max GHZ in asm. Takes in float num from user to square root it and repeats this loop as many time as the user likes.
+     4                                  ;Number of tics is taken before and after the execution. Program the finds average time for the sqaure root func in tics and nano seconds 
+     5                                  ; Copyright (C) 2021 Raul Jarquin Valdez.                                                                           *
+     6                                  ;                                                                                                                           *
+     7                                  ;This file is part of the software program Benchmark.                                                                   *
+     8                                  ;Benchmark is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License   *
+     9                                  ;version 3 as published by the Free Software Foundation.                                                                    *
+    10                                  ;Benchmark is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied          *
+    11                                  ;warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.     *
+    12                                  ;A copy of the GNU General Public License v3 is available here:  <https:;www.gnu.org/licenses/>.                            *
+    13                                  ;**
+    14                                  
+    15                                  
+    16                                  ;========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**
+    17                                  ;
+    18                                  ;Author information
+    19                                  ;  Author name: Raul Jarquin Valdez
+    20                                  ;  Author email: jarquinr121@csu.fullerton.edu
+    21                                  ;
+    22                                  ;Program information
+    23                                  ;  Program name: Benchmark
+    24                                  ;  Programming languages: One module in C and three module in X86
+    25                                  ;  Date program began:  04/01/23
+    26                                  ;  Date of last update: 04/05/23
+    27                                  ;
+    28                                  ;  Files in this program: manager.asm, get_clock_freq.asm, getradicand.asm, main.c
+    29                                  ;  Status: Finished.
+    30                                  ;
+    31                                  ;This file
+    32                                  ;   File name: getradicand.asm
+    33                                  ;   Language: X86 with Intel syntax.
+    34                                  ;   Max page width: 132 columns
+    35                                  ;   Assemble: nasm -f elf64 -l getradicand.lis -o getradicand.o getradicand.asm 
+    36                                  ;   Link: gcc gcc -m64 -no-pie -o main.out manager.o main.o getradicand.o get_clock_freq.o -std=c17
+    37                                  ;   Purpose:  File takes in a float number from the user and sends it back to manager.asm
+    38                                  
+    39                                  ;===== Begin code area ==========================================================================================================================================================
+    40                                  global getradicand
+    41                                  extern printf
+    42                                  extern scanf
+    43                                  
+    44                                  
+    45                                  
+    46                                  segment .data
+    47 00000000 506C6561736520656E-     msg_askForNum db "Please enter a floating radicand for square root bench marking: ",0
+    47 00000009 746572206120666C6F-
+    47 00000012 6174696E6720726164-
+    47 0000001B 6963616E6420666F72-
+    47 00000024 207371756172652072-
+    47 0000002D 6F6F742062656E6368-
+    47 00000036 206D61726B696E673A-
+    47 0000003F 2000               
+    48 00000041 256C6600                float_format db "%lf",0
+    49                                  
+    50                                  segment .bss
+    51                                  
+    52                                  
+    53                                  
+    54                                  
+    55                                  segment .text 
+    56                                  getradicand:
+    57 00000000 6A00                        push qword 0 
+    58                                  
+    59 00000002 55                          push rbp                                             ;Backing up registers
+    60 00000003 4889E5                      mov  rbp,rsp
+    61 00000006 57                          push rdi                                             ;Backup rdi
+    62 00000007 56                          push rsi                                             ;Backup rsi
+    63 00000008 52                          push rdx                                             ;Backup rdx
+    64 00000009 51                          push rcx                                             ;Backup rcx
+    65 0000000A 4150                        push r8                                              ;Backup r8
+    66 0000000C 4151                        push r9                                              ;Backup r9
+    67 0000000E 4152                        push r10                                             ;Backup r10
+    68 00000010 4153                        push r11                                             ;Backup r11
+    69 00000012 4154                        push r12                                             ;Backup r12
+    70 00000014 4155                        push r13                                             ;Backup r13
+    71 00000016 4156                        push r14                                             ;Backup r14
+    72 00000018 4157                        push r15                                             ;Backup r15
+    73 0000001A 53                          push rbx                                             ;Backup rbx
+    74 0000001B 9C                          pushf                                                ;Backup rflags
+    75                                  
+    76                                  
+    77                                  
+    78 0000001C 6A00                        push qword 0        ;"Please enter a floating radicand..."
+    79 0000001E B800000000                  mov rax, 0
+    80 00000023 48BF-                       mov rdi, msg_askForNum
+    80 00000025 [0000000000000000] 
+    81 0000002D E8(00000000)                call printf
+    82 00000032 58                          pop rax
+    83                                  
+    84 00000033 6A00                        push qword 0
+    85 00000035 B800000000                  mov rax, 0
+    86 0000003A 48BF-                       mov rdi, float_format
+    86 0000003C [4100000000000000] 
+    87 00000044 4889E6                      mov rsi,rsp
+    88 00000047 E8(00000000)                call scanf
+    89 0000004C F2440F103C24                movsd xmm15, [rsp]   
+    90 00000052 58                          pop rax
+    91                                  
+    92 00000053 F2410F10C7                  movsd xmm0, xmm15   ;sending back float num 
+    93                                  
+    94 00000058 9D                          popf                                              ;Restore rflags
+    95 00000059 5B                          pop rbx                                           ;Restore rbx
+    96 0000005A 415F                        pop r15                                           ;Restore r15
+    97 0000005C 415E                        pop r14                                           ;Restore r14
+    98 0000005E 415D                        pop r13                                           ;Restore r13
+    99 00000060 415C                        pop r12                                           ;Restore r12
+   100 00000062 415B                        pop r11                                           ;Restore r11
+   101 00000064 415A                        pop r10                                           ;Restore r10
+   102 00000066 4159                        pop r9                                            ;Restore r9
+   103 00000068 4158                        pop r8                                            ;Restore r8
+   104 0000006A 59                          pop rcx                                           ;Restore rcx
+   105 0000006B 5A                          pop rdx                                           ;Restore rdx
+   106 0000006C 5E                          pop rsi                                           ;Restore rsi
+   107 0000006D 5F                          pop rdi                                           ;Restore rdi
+   108 0000006E 5D                          pop rbp                                           ;Restore rbp
+   109                                  
+   110 0000006F 58                          pop rax
+   111 00000070 C3                      ret
