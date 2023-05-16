@@ -1,0 +1,85 @@
+     1                                  ; Name: Raul Jarquin Valdez
+     2                                  ; Email: jarquinr121@csu.fullerton.edu
+     3                                  ; Today's date:  05/15/23
+     4                                  ; Section ID: Section 07, MW 12-2pm
+     5                                  
+     6                                  ;Constants
+     7                                  global manager
+     8                                  extern printf
+     9                                  extern scanf
+    10                                  age equ 44
+    11                                  segment .data
+    12 00000000 486170707920426972-     msg1 db "Happy Birthday Chris for year %d", 10,0
+    12 00000009 746864617920436872-
+    12 00000012 697320666F72207965-
+    12 0000001B 61722025640A00     
+    13                                  
+    14                                  segment .bss
+    15                                  
+    16                                  segment .text
+    17                                  manager:
+    18                                  
+    19 00000000 6A00                    push qword 0                                         ;pushes value 0 onto stack, stored as a 64-bit value
+    20                                                                                             
+    21 00000002 55                      push rbp                                             ;Backing up registers
+    22 00000003 4889E5                  mov  rbp,rsp
+    23 00000006 57                      push rdi                                             ;Backup rdi
+    24 00000007 56                      push rsi                                             ;Backup rsi
+    25 00000008 52                      push rdx                                             ;Backup rdx
+    26 00000009 51                      push rcx                                             ;Backup rcx
+    27 0000000A 4150                    push r8                                              ;Backup r8
+    28 0000000C 4151                    push r9                                              ;Backup r9
+    29 0000000E 4152                    push r10                                             ;Backup r10
+    30 00000010 4153                    push r11                                             ;Backup r11
+    31 00000012 4154                    push r12                                             ;Backup r12
+    32 00000014 4155                    push r13                                             ;Backup r13
+    33 00000016 4156                    push r14                                             ;Backup r14
+    34 00000018 4157                    push r15                                             ;Backup r15
+    35 0000001A 53                      push rbx                                             ;Backup rbx
+    36 0000001B 9C                      pushf                                                ;Backup rflags
+    37                                  
+    38 0000001C 41BF2C000000            mov r15, 44     ; age we want to stop at 
+    39 00000022 41BE01000000            mov r14, 1      ; current age 
+    40                                  
+    41                                  Loop:
+    42 00000028 4D39FE                      cmp r14,r15
+    43 0000002B 7F1F                        jg endLoop
+    44                                  
+    45 0000002D 6A00                        push qword 0 
+    46 0000002F B800000000                  mov rax, 0 
+    47 00000034 48BF-                       mov rdi, msg1
+    47 00000036 [0000000000000000] 
+    48 0000003E 4C89F6                      mov rsi, r14
+    49 00000041 E8(00000000)                call printf
+    50 00000046 58                          pop rax
+    51                                  
+    52 00000047 49FFC6                      inc r14
+    53 0000004A EBDC                        jmp Loop
+    54                                  
+    55                                  endLoop:
+    56                                  
+    57                                  
+    58 0000004C 9D                      popf                                              ;Restore rflags
+    59 0000004D 5B                      pop rbx                                           ;Restore rbx
+    60 0000004E 415F                    pop r15                                           ;Restore r15
+    61 00000050 415E                    pop r14                                           ;Restore r14
+    62 00000052 415D                    pop r13                                           ;Restore r13
+    63 00000054 415C                    pop r12                                           ;Restore r12
+    64 00000056 415B                    pop r11                                           ;Restore r11
+    65 00000058 415A                    pop r10                                           ;Restore r10
+    66 0000005A 4159                    pop r9                                            ;Restore r9
+    67 0000005C 4158                    pop r8                                            ;Restore r8
+    68 0000005E 59                      pop rcx                                           ;Restore rcx
+    69 0000005F 5A                      pop rdx                                           ;Restore rdx
+    70 00000060 5E                      pop rsi                                           ;Restore rsi
+    71 00000061 5F                      pop rdi                                           ;Restore rdi
+    72 00000062 5D                      pop rbp                                           ;Restore rbp
+    73                                  
+    74                                  
+    75                                  
+    76                                  
+    77 00000063 58                      pop rax
+    78 00000064 B82C000000              mov rax, age
+    79                                  
+    80 00000069 C3                      ret
+    81                                  

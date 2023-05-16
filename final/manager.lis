@@ -1,0 +1,266 @@
+     1                                  ; Name: Raul Jarquin Valdez
+     2                                  ; Email: jarquinr121@csu.fullerton.edu
+     3                                  ; Today's date:  05/15/23
+     4                                  ; Section ID: Section 07, MW 12-2pm
+     5                                  
+     6                                  ;Constants
+     7                                  global manager
+     8                                  extern printf
+     9                                  extern scanf
+    10                                  extern getfreq
+    11                                  
+    12                                  segment .data
+    13 00000000 20252E326600            hello db " %.2f",0
+    14 00000006 256C6600                format0 db "%lf",0
+    15 0000000A 256C6600                format1 db "%lf",0
+    16 0000000E 256C6600                format2 db "%lf",0
+    17 00000012 256C6600                format3 db "%lf",0
+    18 00000016 506C6561736520656E-     msg1 db "Please enter the current: ", 0
+    18 0000001F 746572207468652063-
+    18 00000028 757272656E743A2000 
+    19 00000031 506C6561736520656E-     msg2 db "Please enter the resistance on circuit 1: ", 0
+    19 0000003A 746572207468652072-
+    19 00000043 6573697374616E6365-
+    19 0000004C 206F6E206369726375-
+    19 00000055 697420313A2000     
+    20 0000005C 506C6561736520656E-     msg3 db "Please enter the resistance on circuit 2: ", 0
+    20 00000065 746572207468652072-
+    20 0000006E 6573697374616E6365-
+    20 00000077 206F6E206369726375-
+    20 00000080 697420323A2000     
+    21 00000087 506C6561736520656E-     msg4 db "Please enter the resistance on circuit 3: ", 0
+    21 00000090 746572207468652072-
+    21 00000099 6573697374616E6365-
+    21 000000A2 206F6E206369726375-
+    21 000000AB 697420333A2000     
+    22 000000B2 54686520746F74616C-     msg_res db "The total resistance is R = %lf",10,0
+    22 000000BB 20726573697374616E-
+    22 000000C4 63652069732052203D-
+    22 000000CD 20256C660A00       
+    23 000000D3 54686520766F6C7461-     msg_vol db "The voltage is V = %lf", 10,0
+    23 000000DC 67652069732056203D-
+    23 000000E5 20256C660A00       
+    24 000000EB 546865206672657175-     msg_freq db "The frequency of this processor is %lf GHz",10,0
+    24 000000F4 656E6379206F662074-
+    24 000000FD 6869732070726F6365-
+    24 00000106 73736F722069732025-
+    24 0000010F 6C662047487A0A00   
+    25 00000117 54686520636F6D7075-     msg_last db "The computations were performed in  %d tics, which equals %lf seconds.",0
+    25 00000120 746174696F6E732077-
+    25 00000129 65726520706572666F-
+    25 00000132 726D656420696E2020-
+    25 0000013B 256420746963732C20-
+    25 00000144 776869636820657175-
+    25 0000014D 616C7320256C662073-
+    25 00000156 65636F6E64732E00   
+    26                                  
+    27                                  
+    28                                  
+    29                                  segment .bss
+    30                                  
+    31                                  
+    32                                  
+    33                                  segment .text
+    34                                  manager:
+    35                                  
+    36 00000000 6A00                    push qword 0                                         ;pushes value 0 onto stack, stored as a 64-bit value
+    37                                                                                             
+    38 00000002 55                      push rbp                                             ;Backing up registers
+    39 00000003 4889E5                  mov  rbp,rsp
+    40 00000006 57                      push rdi                                             ;Backup rdi
+    41 00000007 56                      push rsi                                             ;Backup rsi
+    42 00000008 52                      push rdx                                             ;Backup rdx
+    43 00000009 51                      push rcx                                             ;Backup rcx
+    44 0000000A 4150                    push r8                                              ;Backup r8
+    45 0000000C 4151                    push r9                                              ;Backup r9
+    46 0000000E 4152                    push r10                                             ;Backup r10
+    47 00000010 4153                    push r11                                             ;Backup r11
+    48 00000012 4154                    push r12                                             ;Backup r12
+    49 00000014 4155                    push r13                                             ;Backup r13
+    50 00000016 4156                    push r14                                             ;Backup r14
+    51 00000018 4157                    push r15                                             ;Backup r15
+    52 0000001A 53                      push rbx                                             ;Backup rbx
+    53 0000001B 9C                      pushf                                                ;Backup rflags
+    54                                  
+    55                                  
+    56 0000001C 6A00                    push qword 0        ;"Please enter the current 
+    57 0000001E B800000000              mov rax, 0 
+    58 00000023 48BF-                   mov rdi, msg1
+    58 00000025 [1600000000000000] 
+    59 0000002D E8(00000000)            call printf
+    60 00000032 58                      pop rax 
+    61                                  
+    62 00000033 6A00                    push qword 0      ; current stored in xmm15 
+    63 00000035 B800000000              mov rax, 0 
+    64 0000003A 48BF-                   mov rdi, format0
+    64 0000003C [0600000000000000] 
+    65 00000044 4889E6                  mov rsi, rsp
+    66 00000047 E8(00000000)            call scanf
+    67 0000004C F2440F103C24            movsd xmm15, [rsp]
+    68 00000052 58                      pop rax 
+    69                                  
+    70 00000053 6A00                    push qword 0        ;"Please enter the r1
+    71 00000055 B800000000              mov rax, 0 
+    72 0000005A 48BF-                   mov rdi, msg2
+    72 0000005C [3100000000000000] 
+    73 00000064 E8(00000000)            call printf
+    74 00000069 58                      pop rax 
+    75                                  
+    76 0000006A 6A00                    push qword 0      ; r1 stored in xmm14
+    77 0000006C B800000000              mov rax, 0 
+    78 00000071 48BF-                   mov rdi, format1
+    78 00000073 [0A00000000000000] 
+    79 0000007B 4889E6                  mov rsi, rsp
+    80 0000007E E8(00000000)            call scanf
+    81 00000083 F2440F103424            movsd xmm14, [rsp]
+    82 00000089 58                      pop rax 
+    83                                  
+    84 0000008A 6A00                    push qword 0        ;"Please enter the r2
+    85 0000008C B800000000              mov rax, 0 
+    86 00000091 48BF-                   mov rdi, msg3
+    86 00000093 [5C00000000000000] 
+    87 0000009B E8(00000000)            call printf
+    88 000000A0 58                      pop rax 
+    89                                  
+    90 000000A1 6A00                    push qword 0      ; r2 stored in xmm13
+    91 000000A3 B800000000              mov rax, 0 
+    92 000000A8 48BF-                   mov rdi, format2
+    92 000000AA [0E00000000000000] 
+    93 000000B2 4889E6                  mov rsi, rsp
+    94 000000B5 E8(00000000)            call scanf
+    95 000000BA F2440F102C24            movsd xmm13, [rsp]
+    96 000000C0 58                      pop rax 
+    97                                  
+    98 000000C1 6A00                    push qword 0        ;"Please enter the r3 
+    99 000000C3 B800000000              mov rax, 0 
+   100 000000C8 48BF-                   mov rdi, msg4
+   100 000000CA [8700000000000000] 
+   101 000000D2 E8(00000000)            call printf
+   102 000000D7 58                      pop rax 
+   103                                  
+   104 000000D8 6A00                    push qword 0      ; r3 stored in xmm12
+   105 000000DA B800000000              mov rax, 0 
+   106 000000DF 48BF-                   mov rdi, format3
+   106 000000E1 [1200000000000000] 
+   107 000000E9 4889E6                  mov rsi, rsp
+   108 000000EC E8(00000000)            call scanf
+   109 000000F1 F2440F102424            movsd xmm12, [rsp]
+   110 000000F7 58                      pop rax 
+   111                                  
+   112                                   ;===== DETERMINE CPU TICS BEFORE ================================================================================================================================================
+   113 000000F8 4831D2                  	xor rdx, rdx
+   114 000000FB 4831C0                      xor rax, rax
+   115 000000FE 0FA2                        cpuid			;Identify your CPU	
+   116 00000100 0F31                    	rdtsc			;Gets number of tics. This combines one half of 	 ;
+   117                                  	;				;rdx and one half of rax into 1 register.			 ;   
+   118                                  	;				;rdtsc = "Read Time Stamp Counter"					 ;
+   119                                  	;																	 ;
+   120                                  	;																	 ;
+   121 00000102 48C1E220                	shl rdx, 32		;Shifts the 32 bits of rdx to the the.
+   122 00000106 4801C2                  	add rdx, rax
+   123 00000109 4989D6                      mov r14, rdx    ;r14 holds tics before
+   124                                  
+   125                                  ; ===== CALULATING TOTAL RESISTANCE & VOLTAGE =======================================================================================================================================
+   126                                  
+   127 0000010C B801000000              mov rax, 1
+   128 00000111 F24C0F2AD8              cvtsi2sd xmm11,rax
+   129 00000116 F2450F10D3              movsd xmm10, xmm11
+   130 0000011B F2450F10CB              movsd xmm9, xmm11
+   131 00000120 F2450F5EDE              divsd xmm11, xmm14
+   132 00000125 F2450F5ED5              divsd xmm10, xmm13
+   133 0000012A F2450F5ECC              divsd xmm9, xmm12
+   134 0000012F F2450F58DA              addsd xmm11, xmm10
+   135 00000134 F2450F58D9              addsd xmm11, xmm9
+   136                                  ; total r is in xmm11
+   137 00000139 F2450F59FB              mulsd xmm15, xmm11
+   138                                  ; push qword 0
+   139                                  ; mov rax, 1
+   140                                  ; mov rdi, hello 
+   141                                  ; movsd xmm0, xmm15
+   142                                  ; call printf
+   143                                  ; pop rax 
+   144                                  ;===== DETERMINE CPU TICS AFTER ================================================================================================================================================
+   145                                      
+   146 0000013E 4831D2                      xor rdx, rdx
+   147 00000141 4831C0                      xor rax, rax
+   148 00000144 0FA2                        cpuid			;Identify your CPU	
+   149 00000146 0F31                    	rdtsc			;Gets number of tics. This combines one half of 	 ;
+   150                                  	;				;rdx and one half of rax into 1 register.			 ;   
+   151                                  	;				;rdtsc = "Read Time Stamp Counter"					 ;
+   152                                  	;																	 ;
+   153                                  	;																	 ;
+   154 00000148 48C1E220                	shl rdx, 32		;Shifts the 32 bits of rdx to the the.
+   155 0000014C 4801C2                  	add rdx, rax
+   156 0000014F 4989D5                      mov r13, rdx    ;r13 holds tics after 
+   157                                  
+   158 00000152 4D29F5                      sub r13, r14 ;tics after - bfore
+   159 00000155 F2490F2ADD                  cvtsi2sd xmm3, r13
+   160 0000015A 6A00                    push qword 0
+   161 0000015C B801000000              mov rax, 1
+   162 00000161 48BF-                   mov rdi, msg_res 
+   162 00000163 [B200000000000000] 
+   163 0000016B F2410F10C3              movsd xmm0, xmm11
+   164 00000170 E8(00000000)            call printf
+   165 00000175 58                      pop rax 
+   166                                  
+   167 00000176 6A00                    push qword 0
+   168 00000178 B801000000              mov rax, 1
+   169 0000017D 48BF-                   mov rdi, msg_vol
+   169 0000017F [D300000000000000] 
+   170 00000187 F2410F10C7              movsd xmm0, xmm15
+   171 0000018C E8(00000000)            call printf
+   172 00000191 58                      pop rax 
+   173                                  
+   174                                  ;==call freq
+   175                                  
+   176                                   ;Getting computer speed in GHz
+   177 00000192 6A00                        push qword 0 
+   178 00000194 B800000000                  mov rax, 0
+   179 00000199 E8(00000000)                call getfreq
+   180 0000019E F2440F10E8                  movsd xmm13, xmm0           ;GHz frequency
+   181 000001A3 58                          pop rax
+   182                                  
+   183                                  
+   184 000001A4 6A00                    push qword 0
+   185 000001A6 B801000000              mov rax, 1
+   186 000001AB 48BF-                   mov rdi, msg_freq 
+   186 000001AD [EB00000000000000] 
+   187 000001B5 F2410F10C5              movsd xmm0, xmm13
+   188 000001BA E8(00000000)            call printf
+   189 000001BF 58                      pop rax 
+   190                                  
+   191 000001C0 F2440F5EEB              divsd xmm13, xmm3
+   192                                  
+   193 000001C5 6A00                    push qword 0
+   194 000001C7 B801000000              mov rax, 1
+   195 000001CC 48BF-                   mov rdi, msg_last
+   195 000001CE [1701000000000000] 
+   196 000001D6 4C89EE                  mov rsi, r13
+   197 000001D9 F20F10C3                movsd xmm0, xmm3
+   198 000001DD E8(00000000)            call printf
+   199 000001E2 58                      pop rax 
+   200                                  
+   201                                  
+   202 000001E3 F2410F10C7              movsd xmm0, xmm15
+   203                                  
+   204 000001E8 9D                      popf                                              ;Restore rflags
+   205 000001E9 5B                      pop rbx                                           ;Restore rbx
+   206 000001EA 415F                    pop r15                                           ;Restore r15
+   207 000001EC 415E                    pop r14                                           ;Restore r14
+   208 000001EE 415D                    pop r13                                           ;Restore r13
+   209 000001F0 415C                    pop r12                                           ;Restore r12
+   210 000001F2 415B                    pop r11                                           ;Restore r11
+   211 000001F4 415A                    pop r10                                           ;Restore r10
+   212 000001F6 4159                    pop r9                                            ;Restore r9
+   213 000001F8 4158                    pop r8                                            ;Restore r8
+   214 000001FA 59                      pop rcx                                           ;Restore rcx
+   215 000001FB 5A                      pop rdx                                           ;Restore rdx
+   216 000001FC 5E                      pop rsi                                           ;Restore rsi
+   217 000001FD 5F                      pop rdi                                           ;Restore rdi
+   218 000001FE 5D                      pop rbp                                           ;Restore rbp
+   219                                  
+   220 000001FF 58                      pop rax
+   221                                  
+   222                                  
+   223 00000200 C3                      ret
+   224                                  

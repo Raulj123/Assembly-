@@ -1,0 +1,445 @@
+     1                                  ; // **
+     2                                  ; // Program name: Data Validation 
+     3                                  ; // validation of incoming numbers and performance comparison of two versions of the sine function.
+     4                                  ; //  Copyright (C) 2021 Raul Jarquin Valdez.                                                                           *
+     5                                  ; //                                                                                                                            *
+     6                                  ; This file is part of the software program Data Validation.                                                                   *
+     7                                  ; Data Validation is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License   *
+     8                                  ; version 3 as published by the Free Software Foundation.                                                                    *
+     9                                  ; Data Validation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied          *
+    10                                  ; warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.     *
+    11                                  ;  A copy of the GNU General Public License v3 is available here:  <https:;www.gnu.org/licenses/>.                            *
+    12                                  ;  **
+    13                                  
+    14                                  
+    15                                  ;  ========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**
+    16                                   
+    17                                  ;  Author information
+    18                                  ;    Author name: Raul Jarquin Valdez
+    19                                  ;    Author email: jarquinr121@csu.fullerton.edu
+    20                                   
+    21                                  ;  Program information
+    22                                  ;   Program name: Data Validation
+    23                                  ;   Programming languages: One modules in C and two module in X86
+    24                                  ;   Date program began:  04/11/23
+    25                                  ;   Date of last update: 04/19/23
+    26                                   
+    27                                  ;   Files in this program: manager.asm, isfloat.asm, driver.c
+    28                                   
+    29                                  ;  This file
+    30                                  ;   File name: manager.asm
+    31                                  ;   Language: X86 with Intel syntax.
+    32                                  ;   Max page width: 132 columns
+    33                                  ;   Compile: nasm -f elf64 -l manager.lis -o manager.o manager.asm
+    34                                  ;   Link: g++ -m64 -no-pie -o output.out driver.o manager.o isfloat.o -std=c17
+    35                                  ;   Purpose:  This file retrieves a valid float num (otherwise rejects it) and computes the taylor series to find the sin value. later using the math.h sin function to compare the performace of those two.
+    36                                   ;===== Begin code area ================================================================================================
+    37                                  
+    38                                  global manager
+    39                                  extern printf
+    40                                  extern scanf
+    41                                  extern fgets
+    42                                  extern stdin
+    43                                  extern strlen
+    44                                  extern isfloat
+    45                                  extern atof
+    46                                  extern sin
+    47                                  input_len equ 100
+    48                                  
+    49                                  
+    50                                  
+    51                                  
+    52                                  section .data
+    53 00000000 B40000000000000000-     degree dq 180,0
+    53 00000009 00000000000000     
+    54 00000010 1F85EB51B81E094000-     pi dq 3.14,0
+    54 00000019 00000000000000     
+    55 00000020 546869732070726F67-     msg_programInfo db "This program Sine Function Benchmark is maintained by Raul Jarquin Valdez",10,0
+    55 00000029 72616D2053696E6520-
+    55 00000032 46756E6374696F6E20-
+    55 0000003B 42656E63686D61726B-
+    55 00000044 206973206D61696E74-
+    55 0000004D 61696E656420627920-
+    55 00000056 5261756C204A617271-
+    55 0000005F 75696E2056616C6465-
+    55 00000068 7A0A00             
+    56 0000006B 506C6561736520656E-     msg_name db "Please enter your name: ",0
+    56 00000074 74657220796F757220-
+    56 0000007D 6E616D653A2000     
+    57 00000084 4974206973206E6963-     msg_greetings db "It is nice to meet you %s. Please enter an angle number in degrees: ",0
+    57 0000008D 6520746F206D656574-
+    57 00000096 20796F752025732E20-
+    57 0000009F 506C6561736520656E-
+    57 000000A8 74657220616E20616E-
+    57 000000B1 676C65206E756D6265-
+    57 000000BA 7220696E2064656772-
+    57 000000C3 6565733A2000       
+    58 000000C9 5468616E6B20796F75-     msg_taylorNum db "Thank you.  Please enter the number of terms in a Taylor series to be computed: ",0
+    58 000000D2 2E2020506C65617365-
+    58 000000DB 20656E746572207468-
+    58 000000E4 65206E756D62657220-
+    58 000000ED 6F66207465726D7320-
+    58 000000F6 696E2061205461796C-
+    58 000000FF 6F7220736572696573-
+    58 00000108 20746F20626520636F-
+    58 00000111 6D70757465643A2000 
+    59 0000011A 5468616E6B20796F75-     msg_ready db "Thank you.  The Taylor series will be used to compute the sine of your angle.",10,0
+    59 00000123 2E2020546865205461-
+    59 0000012C 796C6F722073657269-
+    59 00000135 65732077696C6C2062-
+    59 0000013E 65207573656420746F-
+    59 00000147 20636F6D7075746520-
+    59 00000150 7468652073696E6520-
+    59 00000159 6F6620796F75722061-
+    59 00000162 6E676C652E0A00     
+    60 00000169 54686520636F6D7075-     msg_comp db "The computation completed in %d tics and the computed value is %.9f",10,0
+    60 00000172 746174696F6E20636F-
+    60 0000017B 6D706C657465642069-
+    60 00000184 6E2025642074696373-
+    60 0000018D 20616E642074686520-
+    60 00000196 636F6D707574656420-
+    60 0000019F 76616C756520697320-
+    60 000001A8 252E39660A00       
+    61 000001AE 257300                  string_format db "%s",0
+    62 000001B1 496E76616C69642E20-     msg_invalid db "Invalid. Please try again: ",0
+    62 000001BA 506C65617365207472-
+    62 000001C3 7920616761696E3A20-
+    62 000001CC 00                 
+    63 000001CD 256400                  int_format db "%d",0
+    64 000001D0 54686520636F6D7075-     test1 db "The computed %lf",10,0
+    64 000001D9 74656420256C660A00 
+    65 000001E2 4E6578742074686520-     msg_next db "Next the sine of %.9lf will be computed by the function “sin” in the library <math.h>",10,0
+    65 000001EB 73696E65206F662025-
+    65 000001F4 2E396C662077696C6C-
+    65 000001FD 20626520636F6D7075-
+    65 00000206 746564206279207468-
+    65 0000020F 652066756E6374696F-
+    65 00000218 6E20E2809C73696EE2-
+    65 00000221 809D20696E20746865-
+    65 0000022A 206C69627261727920-
+    65 00000233 3C6D6174682E683E0A-
+    65 0000023C 00                 
+    66 0000023D 54686520636F6D7075-     msg_sinvalue db "The computation completed in %d tics and gave the value %.8f",10,0 
+    66 00000246 746174696F6E20636F-
+    66 0000024F 6D706C657465642069-
+    66 00000258 6E2025642074696373-
+    66 00000261 20616E642067617665-
+    66 0000026A 207468652076616C75-
+    66 00000273 6520252E38660A00   
+    67                                  
+    68                                  section .bss
+    69 00000000 <res 64h>               name resb input_len
+    70                                  
+    71                                  section .text
+    72                                  manager:
+    73                                  
+    74 00000000 6A00                        push qword 0 
+    75                                  
+    76 00000002 55                          push rbp                                             ;Backing up registers
+    77 00000003 4889E5                      mov  rbp,rsp
+    78 00000006 57                          push rdi                                             ;Backup rdi
+    79 00000007 56                          push rsi                                             ;Backup rsi
+    80 00000008 52                          push rdx                                             ;Backup rdx
+    81 00000009 51                          push rcx                                             ;Backup rcx
+    82 0000000A 4150                        push r8                                              ;Backup r8
+    83 0000000C 4151                        push r9                                              ;Backup r9
+    84 0000000E 4152                        push r10                                             ;Backup r10
+    85 00000010 4153                        push r11                                             ;Backup r11
+    86 00000012 4154                        push r12                                             ;Backup r12
+    87 00000014 4155                        push r13                                             ;Backup r13
+    88 00000016 4156                        push r14                                             ;Backup r14
+    89 00000018 4157                        push r15                                             ;Backup r15
+    90 0000001A 53                          push rbx                                             ;Backup rbx
+    91 0000001B 9C                          pushf                                                ;Backup rflags
+    92                                  
+    93 0000001C 6A00                    push qword 0        ;"This program Sine Function Benchmark..."
+    94 0000001E B800000000              mov rax, 0 
+    95 00000023 48BF-                   mov rdi, msg_programInfo
+    95 00000025 [2000000000000000] 
+    96 0000002D E8(00000000)            call printf
+    97 00000032 58                      pop rax 
+    98                                  
+    99 00000033 6A00                    push qword 0        ;"Please enter your name: .."
+   100 00000035 B800000000              mov rax, 0 
+   101 0000003A 48BF-                   mov rdi, msg_name
+   101 0000003C [6B00000000000000] 
+   102 00000044 E8(00000000)            call printf
+   103 00000049 58                      pop rax 
+   104                                  
+   105                                  
+   106 0000004A 6A00                    push qword 0    ;block to store name in buffer
+   107 0000004C B800000000              mov rax, 0
+   108 00000051 48BF-                   mov rdi, name
+   108 00000053 [0000000000000000] 
+   109 0000005B BE64000000              mov rsi, input_len
+   110 00000060 488B1425[00000000]      mov rdx, [stdin]
+   111 00000068 E8(00000000)            call fgets
+   112 0000006D 58                      pop rax
+   113                                  
+   114                                  
+   115 0000006E B800000000              mov rax, 0       ;returns len of string excluding '\0' stores in rax
+   116 00000073 48BF-                   mov rdi, name
+   116 00000075 [0000000000000000] 
+   117 0000007D E8(00000000)            call strlen         
+   118                                  
+   119 00000082 4883E801                sub rax, 1       ;copy value 0 at mem location of \n
+   120 00000086 C680[00000000]00        mov byte[name + rax], 0
+   121                                  
+   122                                  
+   123 0000008D 6A00                    push qword 0     ;"Its nice to meet you.."
+   124 0000008F B800000000              mov rax, 0
+   125 00000094 48BF-                   mov rdi, msg_greetings
+   125 00000096 [8400000000000000] 
+   126 0000009E 48BE-                   mov rsi, name
+   126 000000A0 [0000000000000000] 
+   127 000000A8 E8(00000000)            call printf
+   128 000000AD 58                      pop rax
+   129                                  
+   130                                  Loop:
+   131                                  
+   132 000000AE 6A00                        push qword 0
+   133 000000B0 B800000000                  mov rax, 0
+   134 000000B5 48BF-                       mov rdi, string_format
+   134 000000B7 [AE01000000000000] 
+   135 000000BF 4889E6                      mov rsi, rsp
+   136 000000C2 E8(00000000)                call scanf
+   137                                      
+   138                                  
+   139                                     
+   140 000000C7 B800000000                  mov rax,0
+   141 000000CC 4889E7                      mov rdi,rsp
+   142 000000CF E8(00000000)                call isfloat
+   143 000000D4 4883F800                    cmp rax,0
+   144 000000D8 7415                        je invalid
+   145                                    
+   146                                      
+   147                                      ;converts the user's input from a string to float
+   148 000000DA B800000000                  mov rax, 0
+   149 000000DF 4889E7                      mov rdi, rsp            ;passing the user input stored at the top of the stack into the first parameter
+   150 000000E2 E8(00000000)                call atof               ;atof convers a string float into a double float value
+   151 000000E7 F2440F10F8                  movsd xmm15, xmm0    ;backup the elements in xmm0 and copies into xmm15
+   152 000000EC 58                          pop rax            ;reverse the push qword in the loop if it jumps through this block
+   153 000000ED EB1B                        jmp endLoop
+   154                                  
+   155                                  invalid:
+   156 000000EF 415B                        pop r11         ;counter the push at start of loop
+   157 000000F1 6A00                        push qword 0    ;"Invalid. Please try again: "
+   158 000000F3 B800000000                  mov rax, 0
+   159 000000F8 48BF-                       mov rdi, msg_invalid
+   159 000000FA [B101000000000000] 
+   160 00000102 E8(00000000)                call printf
+   161 00000107 58                          pop rax 
+   162 00000108 EBA4                        jmp Loop
+   163                                  endLoop:
+   164                                  
+   165 0000010A 6A00                    push qword 0        ;"Thank you please enter the num of taylor" 
+   166 0000010C B800000000              mov rax, 0
+   167 00000111 48BF-                   mov rdi, msg_taylorNum
+   167 00000113 [C900000000000000] 
+   168 0000011B E8(00000000)            call printf
+   169 00000120 58                      pop rax 
+   170                                  
+   171 00000121 6A00                    push qword 0 
+   172 00000123 B800000000              mov rax, 0 
+   173 00000128 48BF-                   mov rdi, int_format
+   173 0000012A [CD01000000000000] 
+   174 00000132 4889E6                  mov rsi, rsp
+   175 00000135 E8(00000000)            call scanf             ;Places int format on top of stack 
+   176 0000013A 58                      pop rax
+   177 0000013B 4989C7                  mov r15, rax           ;Stores value popped from the stack into r15, r15 holds number of terms in a Taylor series to be computed
+   178                                  
+   179                                  
+   180 0000013E 6A00                    push qword 0        ;"Thank you.The Taylor..."
+   181 00000140 B800000000              mov rax, 0
+   182 00000145 48BF-                   mov rdi, msg_ready
+   182 00000147 [1A01000000000000] 
+   183 0000014F E8(00000000)            call printf
+   184 00000154 58                      pop rax 
+   185                                  
+   186                                  ;==============================CONVERT TO RAD======================
+   187 00000155 48B8182D4454FB2109-     mov rax, 0x400921FB54442D18
+   187 0000015E 40                 
+   188 0000015F 50                      push rax
+   189 00000160 F2440F103424            movsd xmm14, [rsp]       ;xmm0 contains pi 
+   190 00000166 58                      pop rax
+   191                                  
+   192 00000167 41BEB4000000            mov r14,  180
+   193 0000016D F24D0F2AEE              cvtsi2sd xmm13, r14 
+   194                                  
+   195 00000172 F2410F10DF              movsd xmm3, xmm15       ; xmm3 holds degrees for later use 
+   196                                  
+   197 00000177 F2450F5EF5              divsd xmm14, xmm13        ; pi / 180.0 
+   198 0000017C F2450F59FE              mulsd xmm15, xmm14        ; Degrees * (pi/180.0)
+   199                                  
+   200                                  
+   201                                  ;=========================TAYLOR-SERIES============================
+   202                                  ;    The relation between every term k, k+1 is:                                               
+   203                                  ;   -1 * x^2
+   204                                  ;   -------------
+   205                                  ;   (2k+2)(2k+1)
+   206                                  
+   207                                  ;   Start the term from 1.0 and multiply the recurrance relation against it until terminal
+   208                                  
+   209                                  ;   k is what iteration we are on
+   210                                  ;   x is the user inputted number
+   211                                  ;==================================================================
+   212                                  ; we need 2.0, -1.0 and 1.0 to multiply floats
+   213                                  
+   214 00000181 B802000000              mov rax, 2
+   215 00000186 F24C0F2AE8              cvtsi2sd xmm13, rax     ;xmm13 stores 2.0 
+   216                                  
+   217 0000018B B801000000              mov rax, 1
+   218 00000190 F24C0F2AE0              cvtsi2sd xmm12, rax    ;xmm12 stores 1.0
+   219                                  
+   220 00000195 48C7C0FFFFFFFF          mov rax, -1
+   221 0000019C F24C0F2AD8              cvtsi2sd xmm11, rax     ;xmm1 stores -1.0
+   222                                  
+   223 000001A1 B800000000              mov rax, 0 
+   224 000001A6 F24C0F2AD0              cvtsi2sd xmm10, rax     ;start at k = 0 
+   225                                  
+   226                                  
+   227 000001AB 41BD00000000            mov r13, 0          ;counter for loop
+   228 000001B1 F24D0F2ACD              cvtsi2sd xmm9, r13    ;xmm9 stores sum, intially at 0 
+   229                                  
+   230                                  ; mov rax, 0 
+   231                                  ; cvtsi2sd xmm4, rax 
+   232 000001B6 F2410F10E7              movsd xmm4, xmm15   ; xmm4 stores the current term (rad num)
+   233                                  
+   234                                  ;==============================BEGIN BENCHMARK FOR TAYLOR SERIES========================================================
+   235 000001BB 4831D2                  xor rdx, rdx
+   236 000001BE 4831C0                  xor rax, rax 
+   237 000001C1 0FA2                    cpuid                      
+   238 000001C3 0F31                    rdtsc
+   239 000001C5 48C1E220                shl rdx, 32
+   240 000001C9 4801C2                  add rdx, rax
+   241 000001CC 4989D0                  mov r8, rdx    ;r8 holds tics before 
+   242                                  
+   243                                  
+   244                                  Loop2:
+   245 000001CF 4D39EF                      cmp r15, r13    ;compare number of terms(r15) and counter(r13)
+   246 000001D2 7449                        je endLoop2
+   247                                  
+   248 000001D4 F2440F58CC                  addsd xmm9, xmm4        ;add current term of the sequence     ===================
+   249                                  
+   250 000001D9 F2450F10C5                  movsd xmm8, xmm13       ; xmm8 stores 2.0
+   251 000001DE F2450F59C2                  mulsd xmm8, xmm10       ; xmm8 stores 2.0 * 0(k)        xmm10 is the k 
+   252 000001E3 F2450F58C4                  addsd xmm8, xmm12       ; xmm8 stores result from above + 1
+   253                                  
+   254 000001E8 F2410F10FD                  movsd xmm7, xmm13       ; 2k + 2 stored in xmm7 
+   255 000001ED F2410F59FA                  mulsd xmm7, xmm10 
+   256 000001F2 F2410F58FD                  addsd xmm7, xmm13 
+   257                                  
+   258 000001F7 F2440F59C7                  mulsd xmm8, xmm7        ; (2k+1) * (2k+2)
+   259                                  
+   260 000001FC F2410F10F7                  movsd xmm6, xmm15       ; xmm6 stores user input (originally was a degree but converted into rads)
+   261 00000201 F20F59F6                    mulsd xmm6,xmm6         ; x^2 stored in xmm6 
+   262                                  
+   263 00000205 F2410F5EF0                  divsd xmm6, xmm8        ; x^2 / (2k+1) * (2k+2)    stored in xmm6 
+   264                                  
+   265 0000020A F2410F59F3                  mulsd xmm6, xmm11       ; result frm above *  -1   stored in xmm6 
+   266                                  
+   267                                   
+   268 0000020F F20F59E6                    mulsd xmm4, xmm6       ; current term * factor                    =========================
+   269                                  
+   270 00000213 49FFC5                      inc r13
+   271 00000216 F24D0F2AD5                  cvtsi2sd xmm10, r13   ; inc k 
+   272 0000021B EBB2                        jmp Loop2
+   273                                  endLoop2:
+   274                                  
+   275 0000021D 4831D2                  xor rdx, rdx
+   276 00000220 4831C0                  xor rax, rax 
+   277 00000223 0FA2                    cpuid                   
+   278 00000225 0F31                    rdtsc
+   279 00000227 48C1E220                shl rdx, 32
+   280 0000022B 4801C2                  add rdx, rax
+   281 0000022E 4989D4                  mov r12, rdx             ;r9  holds tics after
+   282                                  
+   283                                  
+   284 00000231 4D29C4                  sub r12, r8             ;Tics After - Tics Before 
+   285                                  
+   286                                  ;==============================END BENCHMARK FOR TAYLOR SERIES========================================================
+   287                                  
+   288 00000234 6A00                    push qword 0 
+   289 00000236 B801000000              mov rax, 1
+   290 0000023B 48BF-                   mov rdi, msg_comp
+   290 0000023D [6901000000000000] 
+   291 00000245 4C89E6                  mov rsi, r12 
+   292 00000248 F2410F10C1              movsd xmm0, xmm9
+   293 0000024D E8(00000000)            call printf
+   294 00000252 58                      pop rax 
+   295                                  
+   296                                  ;roundps xmm3,xmm3,1
+   297                                  
+   298 00000253 6A00                    push qword 0            ;"Next the sine of 22.499999995 will be computed by the.."
+   299 00000255 B801000000              mov rax, 1 
+   300 0000025A 48BF-                   mov rdi, msg_next
+   300 0000025C [E201000000000000] 
+   301 00000264 F20F10C3                movsd xmm0, xmm3
+   302 00000268 E8(00000000)            call printf
+   303 0000026D 58                      pop rax
+   304                                  
+   305                                  ;==============================BEGIN BENCHMARK FOR SIN==============================================================
+   306                                  
+   307 0000026E 4831D2                  xor rdx, rdx
+   308 00000271 4831C0                  xor rax, rax 
+   309 00000274 0FA2                    cpuid                   
+   310 00000276 0F31                    rdtsc
+   311 00000278 48C1E220                shl rdx, 32
+   312 0000027C 4801C2                  add rdx, rax
+   313 0000027F 4989D7                  mov r15, rdx             ;r15  holds tics before
+   314                                  
+   315 00000282 6A00                    push qword 0 
+   316 00000284 B800000000              mov rax, 0 
+   317 00000289 F2410F10C7              movsd xmm0, xmm15
+   318 0000028E E8(00000000)            call sin
+   319 00000293 F2440F10F8              movsd xmm15,xmm0
+   320 00000298 58                      pop rax 
+   321                                  
+   322                                  
+   323 00000299 4831D2                  xor rdx, rdx
+   324 0000029C 4831C0                  xor rax, rax 
+   325 0000029F 0FA2                    cpuid                   
+   326 000002A1 0F31                    rdtsc
+   327 000002A3 48C1E220                shl rdx, 32
+   328 000002A7 4801C2                  add rdx, rax
+   329 000002AA 4989D6                  mov r14, rdx             ;r14  holds tics after
+   330                                  
+   331 000002AD 4D29FE                  sub r14, r15             ;Tics After - Tics Before
+   332                                  
+   333                                  
+   334                                  ;==============================END BENCHMARK FOR SIN==================================================================
+   335                                  
+   336 000002B0 6A00                    push qword 0 
+   337 000002B2 B801000000              mov rax, 1
+   338 000002B7 48BF-                   mov rdi, msg_sinvalue
+   338 000002B9 [3D02000000000000] 
+   339 000002C1 4C89F6                  mov rsi, r14
+   340 000002C4 F2410F10C7              movsd xmm0, xmm15
+   341 000002C9 E8(00000000)            call printf
+   342 000002CE 58                      pop rax 
+   343                                  
+   344 000002CF 4C89E0                  mov rax, r12
+   345 000002D2 F24D0F2AFC              cvtsi2sd xmm15, r12
+   346 000002D7 F2410F10C7              movsd xmm0, xmm15 
+   347                                  
+   348 000002DC 9D                          popf                                              ;Restore rflags
+   349 000002DD 5B                          pop rbx                                           ;Restore rbx
+   350 000002DE 415F                        pop r15                                           ;Restore r15
+   351 000002E0 415E                        pop r14                                           ;Restore r14
+   352 000002E2 415D                        pop r13                                           ;Restore r13
+   353 000002E4 415C                        pop r12                                           ;Restore r12
+   354 000002E6 415B                        pop r11                                           ;Restore r11
+   355 000002E8 415A                        pop r10                                           ;Restore r10
+   356 000002EA 4159                        pop r9                                            ;Restore r9
+   357 000002EC 4158                        pop r8                                            ;Restore r8
+   358 000002EE 59                          pop rcx                                           ;Restore rcx
+   359 000002EF 5A                          pop rdx                                           ;Restore rdx
+   360 000002F0 5E                          pop rsi                                           ;Restore rsi
+   361 000002F1 5F                          pop rdi                                           ;Restore rdi
+   362 000002F2 5D                          pop rbp                                           ;Restore rbp
+   363                                  
+   364 000002F3 58                      pop rax 
+   365                                  
+   366                                      
+   367                                  
+   368 000002F4 C3                      ret
